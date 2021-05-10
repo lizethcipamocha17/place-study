@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+    {% load static %}
+    <!-- Bootstrap -->
+    <link href="{% static 'bootstrap5.0/css/bootstrap.min.css' %}" rel="stylesheet">
+
+    <!-- Fonts Google-->
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Spartan:wght@300;600&display=swap" rel="stylesheet">
+    <!-- Inconos-->
+    <script src="https://kit.fontawesome.com/35a53957a4.js" crossorigin="anonymous"></script>
+
+    <!-- Styles -->
+    <link href="{% static 'css/login.css' %}" rel="stylesheet">
+    <title>Hello, world!</title>
+</head>
+<body class="bg-white">
+<section>
+    <div class="row g-0">
+        <div class="col-lg-7">
+            <div id="carouselExampleCaptions" class="carousel slide" data-bs-ride="carousel">
+                <div class="carousel-indicators">
+                    <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="0" class="active"
+                            aria-current="true" aria-label="Slide 1"></button>
+                    <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="1"
+                            aria-label="Slide 2"></button>
+                    <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="2"
+                            aria-label="Slide 3"></button>
+                </div>
+                <div class="carousel-inner">
+                    <div class="carousel-item img-1  active">
+                        <img src="../../../../static/img/carrucel_imagen_3.jpg" height="960" width="1050"/>
+                        <div class="carousel-caption d-none d-md-block">
+                            <h5 class="font-weight-bold">Aprende con un chatbot</h5>
+                            <p>Puedes interacturar con él sobre conceptos de competencias ciudadanas.</p>
+                        </div>
+                    </div>
+                    <div class="carousel-item">
+                        <img src="../../../../static/img/carrucel_imagen_2.jpg" class="d-block w-100" alt="...">
+                        <div class="carousel-caption d-none d-md-block">
+                            <h5>Second slide label</h5>
+                            <p>Some representative placeholder content for the second slide.</p>
+                        </div>
+                    </div>
+                    <div class="carousel-item">
+                        <img src="../../../../static/img/carrucel_imagen_1.jpg" class="d-block w-100" alt="...">
+                        <div class="carousel-caption d-none d-md-block">
+                            <h5>Third slide label</h5>
+                            <p>Some representative placeholder content for the third slide.</p>
+                        </div>
+                    </div>
+                </div>
+                <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleCaptions"
+                        data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" role="button" data-bs-target="#carouselExampleCaptions"
+                        data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Next</span>
+                </button>
+            </div>
+        </div>
+        <div class="col-lg-5 d-flex flex-column align-items-end min-vh-100">
+            <div class="px-lg-5 pt-lg-4 pb-lg-3 p-4 w-100 mb-auto">
+                <img src="../../../../static/img/logo.png" class="img-fluid">
+            </div>
+            <div class="px-lg-5 py-lg-4 p-4 w-100 align-self-center">
+                <h1 class="font-weight-bold mb-4"> Bienvenido de Vuelta</h1>
+
+                <form class="mb-5" action="{% url 'login' %}" method="post">
+                    {% csrf_token %}
+                    {% if form.username_field_errors %}
+                        {% for error in form.username_field_errors %}
+                            <div class="alert alert-danger alert-dismissible fade show mb-5" role="alert">
+                                <small>{{ error }}</small>
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                    <div class="mb-4">
+
+                        <label for="{{ form.username.id_for_label }}"
+                               class="form-label fw-bold">Usuario</label>
+                        <input type="text" class="form-control" placeholder="Ingresa tu usuario"
+                               id="{{ form.username.id_for_label }}" name="{{ form.username.html_name }}">
+                    </div>
+                    <div class="mb-4">
+                        <label for="{{ form.password.id_for_label }}"
+                               class="form-label fw-bold">Contraseña</label>
+                        <input type="password" class="form-control mb-2" placeholder="Ingresa tu contraseña"
+                               id="{{ form.password.id_for_label }}" name="{{ form.password.html_name }}">
+
+                        {% if form.password.errors %}
+                            {% for error in form.password.errors %}
+                                <span class="invalid-feedback d-block">
+                            <span class="d-block">
+                                <span class="form-error-icon badge badge-danger text-uppercase">Error</span>
+                                <span class="form-error-message">{{ error|escape }}</span>
+                            </span>
+                        </span>
+                            {% endfor %}
+                        {% endif %}
+                        <a href="{% url 'password_reset' %}" id="emailHelp" class="form-text">¿Has olvidado tu
+                            contraseña?</a>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Iniciar Sesión</button>
+                </form>
+
+                <p class="font-weight-bold text-center text-dark"> O Inicia sesión con </p>
+                <div class="d-flex justify-content-around">
+                    <button type="submit" class="btn btn-outline-danger flex-grow-1 me-2"><i
+                            class="fab fa-google lead me-2"></i>Google
+                    </button>
+                    <button type="submit" class="btn btn-outline-primary flex-grow-1 ms-2"><i
+                            class="fab fa-facebook-f lead me-2"></i>Facebook
+                    </button>
+                </div>
+            </div>
+            <div class="text-center px-lg-5 pt-lg-3 pb-lg-4 p-4 w-100 mt-auto">
+                <p class="d-inline-block mb-0">¿Todavía no tienes una cuenta?</p>
+                <a href="{% url 'register' %}"
+                   class="text-info font-weight-bold text-decoration-underline">Crea
+                    una cuenta ahora</a>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<!-- Bootstrap -->
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"
+        integrity="sha384-SR1sx49pcuLnqZUnnPwx6FCym0wLsk5JZuNx2bPPENzswTNFaQU1RDvt3wT4gWFG"
+        crossorigin="anonymous"></script>
+<script src="{% static 'bootstrap5.0/js/bootstrap.min.js' %}"></script>
+
+
+</body>
+</html>
+{#{% block title %}Log-in{% endblock %}#}
+{##}
+{#{% block content %}#}
+{#    <h1>Log-in</h1>#}
+{#    {% if form.errors %}#}
+{#        <p>#}
+{#            Your username and password didn't match.#}
+{#            Please try again.#}
+{#        </p>#}
+{#    {% else %}#}
+{#        <p>Please, use the following form to log-in. If you don't have an accounts <a href="{% url 'register' %}">register#}
+{#            here</a></p>#}
+{#    {% endif %}#}
+{#    <div class="login-form">#}
+{#        <form action="{% url 'login' %}" method="post">#}
+{#            {{ form.as_p }}#}
+{#            {% csrf_token %}#}
+{#            <input type="hidden" name="next" value="{{ next }}"/>#}
+{#            <p><input type="submit" value="Log-in"></p>#}
+{#        </form>#}
+{#        <p><a href="{% url 'password_reset' %}">Forgotten your password?</a></p>#}
+{#    </div>#}
+{##}
+{#{% endblock %}#}
