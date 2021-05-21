@@ -25,12 +25,11 @@ SECRET_KEY = config('DJANGO_SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', cast=bool)
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=Csv())
+# ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=Csv())
 
 # Application definition
 
 INSTALLED_APPS = [
-    'admin_interface',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -40,14 +39,17 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'apps.accounts',
     'apps.schools',
-    'colorfield',
+    'apps.questions',
+
+    # django rest framework
+    'rest_framework',
+    'rest_framework.authtoken',
 
     # django all-auth
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
 ]
-
 X_FRAME_OPTIONS = 'SAMEORIGIN'  # only if django version >= 3.0
 
 LOGIN_REDIRECT_URL = '/'
@@ -146,6 +148,12 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ]
+}
+
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/
 
@@ -169,11 +177,13 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, "static"),
 )
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(os.path.dirname(BASE_DIR), "static_cdn", "media_root")
+# MEDIA_URL = '/media/'
+# MEDIA_ROOT = os.path.join(os.path.dirname(BASE_DIR), "static_cdn", "media_root")
 
 # Admin
 ADMIN_URL = config('DJANGO_ADMIN_URL')
+
+WHITENOISE_AUTOREFRESH = True
 
 # Email settings
 EMAIL_PORT = 587

@@ -85,11 +85,12 @@
     <div class="container my-4">
         <div class="row">
             <div class="col-lg-8">
+                {% for content in contents %}
                 <div class="card mb-5">
                     <div class="card-body d-flex">
                         <div class="d-flex flex-grow-1">
                             <div class="profile-picture rounded-circle me-3"></div>
-                            <a href="#" class="text-dark text-decoration-none fw-bold align-self-center"> Santander</a>
+                            <a href="#" class="text-dark text-decoration-none fw-bold align-self-center">{{ content.name_content}}</a>
                         </div>
                         <div class="align-self-center">
                             <i class="fas fa-ellipsis-h"></i>
@@ -108,8 +109,8 @@
                             </div>
                         </div>
                         <p class="fw-bold">130 Me gusta</p>
-                        <p class="mb-0"><a href="#" class="text-dark fw-bold text-decoration-none">Santander</a> Que
-                            recuerdos cuando logramos la liberta, fue una gran guerra </p>
+                        <p class="mb-0"><a href="#" class="text-dark fw-bold text-decoration-none">Santander</a>{{content.description }}
+                        </p>
                         <div class="d-flex mb-3">
                             <p class="flex-grow-1 mb-0"><a href="#" class="text-dark fw-bold text-decoration-none">Colboy</a>
                                 Tubo que ser algo dificil!!!</p>
@@ -121,6 +122,7 @@
                         <input type="text" class="form-control border-0" placeholder="Agregar comentario...">
                         <button type="submit" class="btn btn-link fw-bold text-decoration-none">Publicar</button>
                     </div>
+                    {% endfor %}
                 </div>
             </div>
             <div class="col-lg-4">

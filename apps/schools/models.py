@@ -3,42 +3,41 @@ from django.db import models
 
 # Create your models here.
 class School(models.Model):
-    id_school = models.AutoField(primary_key=True)
-    code_dane = models.CharField('codigo dane del colegio', max_length=30)
-    location = models.ForeignKey('accounts.Location', on_delete=models.CASCADE)
-    name_school = models.CharField('nombre del colegio', max_length=120)
-    name_calendar = models.CharField('tipo calendario', null=True, max_length=20)
-    address = models.CharField('dirección del colegio', null=True, max_length=120)
+    school_id = models.AutoField(primary_key=True)
+    location_id = models.ForeignKey('accounts.Location', on_delete=models.CASCADE, verbose_name='Departamento')
+    school_name = models.CharField('nombre del colegio', max_length=120)
 
     class Meta:
         db_table = 'school'
         verbose_name = 'colegio'
         verbose_name_plural = 'colegios'
+        ordering = ['school_name']
 
-    # def __str__(self):
-    #     return self.name_school
-
-
-class Category(models.Model):
-    id_category = models.AutoField(primary_key=True)
-    name_category = models.CharField('nombre categoria', max_length=50)
-    description = models.CharField('descripcion', max_length=60)
-
-    class Meta:
-        db_table = 'category'
-        verbose_name = 'categoria'
-        verbose_name_plural = 'categorias'
+    def __str__(self):
+        return self.school_name
 
 
 class Content(models.Model):
-    id_content = models.AutoField(primary_key=True)
-    category = models.ForeignKey(Category, on_delete=models.CASCADE)
-    school = models.ForeignKey(School, on_delete=models.CASCADE)
-    name_content = models.CharField('Nombre de la Publicación', max_length=60)
-    description = models.CharField('Descripción de la publicación', max_length=150)
-    image = models.ImageField('Imagen de la publicación', upload_to='content/image', blank=True)
+    content_id = models.AutoField(primary_key=True)
+    school_id = models.ForeignKey(School, on_delete=models.CASCADE)
+    name = models.CharField('Nombre de la Publicación', max_length=60)
+    description = models.CharField('Descripción de la publicación', max_length=60)
+    image = models.ImageField('Imagen de la publicación', upload_to='content/image')
 
     class Meta:
         db_table = 'content'
         verbose_name = 'contenido'
         verbose_name_plural = 'contenidos'
+
+
+class Comment(models.Model):
+    comment_id = models.AutoField(primary_key=True)
+    content_id = models.ForeignKey(Content, on_delete=models.CASCADE)
+    user_id = models.OneToOneField('accounts.User', on_delete=models.CASCADE)
+    text = models.CharField('comentario', max_length=100)
+    like = models.BooleanField('Me gusta')
+
+    class Meta:
+        db_table = 'comment'
+        verbose_name = 'comentario'
+        verbose_name_plural = 'comentarios'

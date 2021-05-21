@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 
-from apps.accounts.models import User
+from apps.accounts.models import User, Location
 
 
 # class LoginForm(forms.Form):
@@ -9,7 +9,7 @@ from apps.accounts.models import User
 #     password = forms.CharField(widget=forms.PasswordInput)
 
 
-class UserRegistrationForm(UserCreationForm):
+class SignupForm(UserCreationForm):
     class Meta:
         model = User
         fields = (
@@ -35,6 +35,13 @@ class UserRegistrationForm(UserCreationForm):
             }),
             'email': forms.EmailInput(attrs={
                 'class': 'form-control',
+            }),
+            'department': forms.ModelChoiceField(attrs={
+                'class': 'form-select',
+                # Location.objects.order_by('name_department')[4]
+            }),
+            'municipality': forms.CheckboxInput(attrs={
+                'class': 'form-select'
             }),
             'terms': forms.CheckboxInput(attrs={
                 'class': 'custom-control-input'
