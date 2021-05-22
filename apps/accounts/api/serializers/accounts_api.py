@@ -52,7 +52,7 @@ class UserSignUpSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['first_name', 'last_name', 'birthday_date',
-                  'school_id', 'username', 'email', 'password']
+                  'school_id', 'user_id', 'username', 'email', 'password', 'password_confirmation']
 
     def validate(self, data):
         passwd = data['password']
@@ -65,9 +65,3 @@ class UserSignUpSerializer(serializers.ModelSerializer):
         data.pop('password_confirmation')
         user = User.objects.create_user(**data)
         return user
-
-
-class TeacherSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ['first_name', 'last_name', 'school_id', 'email']

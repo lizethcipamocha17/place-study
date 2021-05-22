@@ -12,7 +12,7 @@ from apps.schools.models import School
 
 class Location(models.Model):
     location_id = models.AutoField(primary_key=True)
-    location_father = models.ForeignKey('accounts.Location', on_delete=models.CASCADE, null=True)
+    location_father = models.ForeignKey('self', on_delete=models.CASCADE,related_name='location', null=True)
     location_name = models.CharField('nombre de la ubicación', max_length=120)
     location_type = models.CharField('Tipo de ubicación', max_length=30)
 
@@ -56,7 +56,7 @@ class UserManager(BaseUserManager):
         return user
 
     def create_user(
-            self, first_name, last_name, username, birthday_date, email, password,school_id, **extra_fields
+            self, first_name, last_name, username, birthday_date, email, password, school_id, **extra_fields
     ):
         """
         Create a user
@@ -89,13 +89,17 @@ class User(AbstractBaseUser, PermissionsMixin):
         INVITED = 'IVT', 'Invitado'
 
     user_id = models.AutoField(primary_key=True)
+    teacher = models.ForeignKey(
+        'self', on_delete=models.CASCADE, related_name='teacher_user', null=True, blank=True,
+        verbose_name='Docente encargado'
+    )
     school_id = models.ForeignKey(School, on_delete=models.CASCADE, verbose_name='Colegio')
     first_name = models.CharField('Nombres', max_length=60)
     last_name = models.CharField('Apellidos', max_length=60)
-    email = models.EmailField('correo del usuario', unique=True, max_length=30)
+    email = models.EmailField('correo del usuario', unique=True, max_length=50)
     contact_email = models.EmailField('correo del padre de familia', blank=True, null=True, max_length=30)
     birthday_date = models.DateField('fecha de nacimiento')
-    photo = models.ImageField(upload_to='users/pictures', blank=True)
+    photo = models.ImageField(upload_to='users/pictures', blank=True, null=True)
     username = models.CharField(
         'usuario',
         max_length=15,
