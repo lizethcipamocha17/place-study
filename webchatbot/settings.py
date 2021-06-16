@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 
 import os
 from decouple import config, Csv
+from datetime import timedelta
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -37,6 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites',
+
+    # apps local
     'apps.accounts',
     'apps.schools',
     'apps.questions',
@@ -49,6 +52,9 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
+
+    # django cleanup
+    'django_cleanup',
 ]
 X_FRAME_OPTIONS = 'SAMEORIGIN'  # only if django version >= 3.0
 
@@ -70,7 +76,13 @@ ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_AUTHENTICATION_METHOD = 'email'  # Verifica que se loguee con email
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 ACCOUNT_EMAIL_SUBJECT_PREFIX = 'Chatbot - '
-ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 1  # Numero de días para que expire el email de verificacion de cuenta
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+SECRET_KEY_TOKEN = config('SECRET_KEY_TOKEN')
+JWT_ACTIVATION_ACCOUNT_EXPIRE_DELTA = timedelta(
+    days=1)  # Numero de días para que expire el email de verificacion de cuenta
+JWT_RESET_PASSWORD_EXPIRE_DELTA = timedelta(minutes=15)
 
 ACCOUNT_FORMS = {
     # 'login': 'apps.accounts.forms.CustomLoginForm',
@@ -93,7 +105,7 @@ ROOT_URLCONF = 'webchatbot.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -108,7 +120,7 @@ TEMPLATES = [
 
 AUTHENTICATION_BACKENDS = [
 
-    'django.contrib.auth.backends.ModelBackend',
+    'django.contrib.auth.backends.AllowAllUsersModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
 
 ]
@@ -178,7 +190,7 @@ STATICFILES_DIRS = (
 )
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(os.path.dirname(BASE_DIR), "media")
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 # Admin
 ADMIN_URL = config('DJANGO_ADMIN_URL')
@@ -192,3 +204,5 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = config('EMAIL_HOST_USER')  # env
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')  # env
 DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL')  # env
+# Default admin email
+DEFAULT_ADMIN_EMAIL = config('DEFAULT_ADMIN_EMAIL')  # env

@@ -1,18 +1,24 @@
 from time import timezone
-from tkinter import Entry
 
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.models import PermissionsMixin
 from django.contrib.auth.validators import UnicodeUsernameValidator
+from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.utils import timezone
+
+from .validators import validate_photo_weight
 
 from apps.schools.models import School
 
 
+def upload_to(filename):
+    return 'photo/{filename}'.format(filename=filename)
+
+
 class Location(models.Model):
-    location_id = models.AutoField(primary_key=True)
-    location_father = models.ForeignKey('self', on_delete=models.CASCADE,related_name='location', null=True)
+    location_id = models.BigAutoField(primary_key=True)
+    location_father = models.ForeignKey('self', on_delete=models.CASCADE, related_name='location', null=True)
     location_name = models.CharField('nombre de la ubicación', max_length=120)
     location_type = models.CharField('Tipo de ubicación', max_length=30)
 
@@ -21,16 +27,13 @@ class Location(models.Model):
         verbose_name = 'ubicacion'
         verbose_name_plural = 'ubicaciones'
 
-    # def __str__(self):
-    #     return self.name_department + "   " + self.name_municipality
-
 
 class UserManager(BaseUserManager):
     """Custom User Manager"""
 
     def _create_user(
-            self, first_name, last_name, username, birthday_date, email, password, type_user, school_id,
-            is_staff, is_superuser, **extra_fields
+            self, first_name, last_name, username, birthday_date, email, password, type_user, school, teacher,
+            is_staff, is_superuser, is_active, **extra_fields
     ):
         """
         Create a user. This function is called from the console.
@@ -45,9 +48,11 @@ class UserManager(BaseUserManager):
             email=self.normalize_email(email),
             password=password,
             type_user=type_user,
-            school_id=School.objects.get(pk=school_id),
+            school=School.objects.get(pk=school),
+            teacher=None if teacher is None else User.objects.get(pk=teacher.user_id),
             is_staff=is_staff,
             is_superuser=is_superuser,
+            is_active=is_active,
             terms=True,
             **extra_fields
         )
@@ -56,19 +61,20 @@ class UserManager(BaseUserManager):
         return user
 
     def create_user(
-            self, first_name, last_name, username, birthday_date, email, password, school_id, **extra_fields
+            self, first_name, last_name, username, birthday_date, email, password, type_user, school, teacher=None,
+            **extra_fields
     ):
         """
         Create a user
         :return: User
         """
         return self._create_user(
-            first_name, last_name, username, birthday_date, email, password, User.Type.STUDENT, school_id, False,
-            False, **extra_fields
+            first_name, last_name, username, birthday_date, email, password, type_user, school, teacher, False,
+            False, False, **extra_fields
         )
 
     def create_superuser(
-            self, first_name, last_name, username, birthday_date, email, password, school_id,
+            self, first_name, last_name, username, birthday_date, email, password, school,
             **extra_fields
     ):
         """
@@ -76,8 +82,8 @@ class UserManager(BaseUserManager):
         :return: User
         """
         return self._create_user(
-            first_name, last_name, username, birthday_date, email, password, User.Type.ADMIN, school_id, True,
-            True, **extra_fields
+            first_name, last_name, username, birthday_date, email, password, User.Type.ADMIN, school, None,
+            True, True, True, **extra_fields
         )
 
 
@@ -88,23 +94,27 @@ class User(AbstractBaseUser, PermissionsMixin):
         STUDENT = 'STDT', 'Estudiante'
         INVITED = 'IVT', 'Invitado'
 
-    user_id = models.AutoField(primary_key=True)
+    user_id = models.BigAutoField(primary_key=True)
     teacher = models.ForeignKey(
         'self', on_delete=models.CASCADE, related_name='teacher_user', null=True, blank=True,
         verbose_name='Docente encargado'
     )
-    school_id = models.ForeignKey(School, on_delete=models.CASCADE, verbose_name='Colegio')
+    school = models.ForeignKey(School, on_delete=models.CASCADE, verbose_name='Colegio')
     first_name = models.CharField('Nombres', max_length=60)
     last_name = models.CharField('Apellidos', max_length=60)
     email = models.EmailField('correo del usuario', unique=True, max_length=50)
-    contact_email = models.EmailField('correo del padre de familia', blank=True, null=True, max_length=30)
     birthday_date = models.DateField('fecha de nacimiento')
-    photo = models.ImageField(upload_to='users/pictures', blank=True, null=True)
+    photo = models.ImageField(
+        upload_to=upload_to,
+        validators=[FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png']), validate_photo_weight],
+        blank=True,
+        null=True
+    )
     username = models.CharField(
         'usuario',
         max_length=15,
         unique=True,
-        help_text='Su usuario debe tener maximo 15 caracteres. Letras, dígitos y @/./+/-/_ solamente.',
+        help_text='Su usuario debe tener y maximo 15 caracteres. Letras, dígitos y @/./+/-/_ solamente.',
         validators=[UnicodeUsernameValidator()],
         error_messages={
             'unique': 'Ya existe un usuario con este nombre de usuario.',
@@ -113,7 +123,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     type_user = models.CharField('tipo de usuario', max_length=10, choices=Type.choices, default=Type.STUDENT)
     is_active = models.BooleanField(
         'activo',
-        default=True,
+        default=False,
         help_text='Indica que la cuenta del usuario está activa.'
     )
     is_staff = models.BooleanField(
@@ -122,33 +132,37 @@ class User(AbstractBaseUser, PermissionsMixin):
         help_text='Designa si este usuario puede acceder al sitio de administración.'
     )
     terms = models.BooleanField('terminos y condiciones')
-    date_creation = models.DateTimeField('fecha de registro', auto_now_add=True)
+    created_at = models.DateTimeField('fecha de registro', auto_now_add=True)
+    updated_at = models.DateTimeField('fecha de actualización', auto_now=True)
 
     objects = UserManager()
     USERNAME_FIELD = 'email'
     EMAIL_FIELD = 'email'
 
-    REQUIRED_FIELDS = ['first_name', 'last_name', 'username', 'birthday_date', 'school_id']
+    REQUIRED_FIELDS = ['first_name', 'last_name', 'username', 'birthday_date', 'school']
 
     class Meta:
         db_table = 'user'
         verbose_name = 'usuario'
         verbose_name_plural = 'usuarios'
 
-    def type_user_teacher(self):
-        return self.type_user.find('Docente')
+    def __str__(self):
+        return self.username
 
-    def is_adult(self):
-        """Verificar si el usuario es mayor de 18 años"""
-        age = timezone.now() - self.birthday_date
-        return True if age >= 18 else False
+    @property
+    def full_name(self):
+        return f'{self.first_name} {self.last_name}'
+
+    # def type_user_teacher(self):
+    #     return self.type_user.find('Docente')
 
 
 class Log(models.Model):
-    log_id = models.AutoField(primary_key=True)
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    log_id = models.BigAutoField(primary_key=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     log_name = models.CharField('nombre del reporte', max_length=30)
     date_conection = models.DateField(auto_now_add=True)  # ultima fecha de conexion
+    created_at = models.DateTimeField('fecha de creación', auto_now_add=True)
 
     class Meta:
         db_table = 'log'

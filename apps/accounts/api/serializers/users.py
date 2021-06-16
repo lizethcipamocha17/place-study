@@ -1,25 +1,110 @@
 # Django REST framework
+from django.contrib.auth import password_validation
+# Django
+from django.core.exceptions import ValidationError
+from django.core.validators import FileExtensionValidator
+
 from rest_framework import serializers
-from rest_framework.authtoken.models import Token
 
 # Models
 from apps.accounts.models import User
+from apps.schools.api.serializers.serializers import SchoolSerializer
 
 
-class UserProfileSerializer(serializers.ModelSerializer):
+class UserAdminSerializer(serializers.ModelSerializer):
+    """
+    UserAdminSerializer is the serializer for type user Admin
+    """
+    school = SchoolSerializer(read_only=True)
+
+    class Meta:
+        model = User
+        fields = ('first_name', 'last_name', 'email', 'birthday_date', 'photo', 'username', 'school',
+                  'type_user', 'is_staff', 'is_active', 'is_superuser')
+
+
+class UserTeacherSerializer(serializers.ModelSerializer):
+    """
+    UserTeacherSerializer is the serializer for type user teacher
+    """
+    school = SchoolSerializer(read_only=True)
+
     class Meta:
         model = User
         fields = (
-            'first_name', 'last_name', 'email', 'contact_email', 'birthday_date', 'photo', 'username', 'school_id'
+            'first_name', 'last_name', 'email', 'birthday_date', 'photo', 'username', 'school', 'type_user'
         )
 
-        read_only_fields = ('first_name', 'school_id')
 
+class UserTeacherListRelatedSerializer(serializers.ModelSerializer):
+    """
+    User teacher list related serializers
+    Must be used for relational fields with read only
+    """
 
-class TeacherSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        exclude = (
-            'password', 'last_login', 'is_superuser', 'type_user', 'is_active', 'is_staff', 'date_creation', 'groups',
-            'user_permissions'
+        fields = (
+            'first_name', 'last_name', 'email', 'photo', 'username'
         )
+
+
+class UserStudentSerializer(serializers.ModelSerializer):
+    """
+    UserStudentSerializer is the serializer for type user students
+    """
+
+    school = SchoolSerializer(read_only=True)
+    teacher = UserTeacherListRelatedSerializer(read_only=True)
+
+    class Meta:
+        model = User
+        fields = (
+            'first_name', 'last_name', 'email', 'teacher', 'birthday_date', 'photo', 'username', 'school',
+            'type_user'
+        )
+        read_only_fields = ('first_name', 'last_name', 'email', 'birthday_date', 'photo')
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    """
+    Serializer for password change endpoint.
+    """
+
+    old_password = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True)
+    new_password_confirmation = serializers.CharField(required=True)
+
+    def validate_old_password(self, value):
+        if not self.instance.check_password(value):
+            raise serializers.ValidationError(
+                'Su contraseña actual es incorrecta.Por favor ingresala de nuevo.'
+            )
+        return value
+
+    def validate(self, data):
+
+        if data['new_password'] != data['new_password_confirmation']:
+            raise serializers.ValidationError(
+                {'new_password_confirmation': "Los campos de la contraseña nueva no coinciden."})
+        try:
+            password_validation.validate_password(data['new_password'], self.instance)
+        except ValidationError as error:
+            raise serializers.ValidationError(
+                {'new_password_confirmation': error.messages}, code='new_password_confirmation'
+            )
+        return data
+
+    def update(self, instance, validated_data):
+        self.instance.set_password(validated_data['new_password_confirmation'])
+        self.instance.save(update_fields=['password', 'updated_at'])
+        return self.instance
+
+
+class UpdateAvatarSerializer(serializers.Serializer):
+    photo = serializers.CharField(required=True)
+
+    def update(self, instance, validated_data):
+        instance.photo = validated_data['photo']
+        instance.save(update_fields=['photo', 'updated_at'])
+        return instance

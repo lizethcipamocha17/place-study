@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+</head>
+<body>
+
+<table align="center" border="0" cellpadding="0" cellspacing="0" width="600">
+    <tr>
+        <td bgcolor="#095094" style="padding: 15px 15px 15px 15px; text-align: center; color:#ffffff;">
+            <h1><strong>Place Study</strong></h1>
+        </td>
+    </tr>
+    <tr>
+        <td style="padding: 15px 15px 15px 15px; text-align: center">
+            <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                <tr>
+                    <td>
+                        <h1>
+                            {% if teacher_first_name is None %} Hola! {% else %} Hola, {{ teacher_first_name }}
+                                !{% endif %}
+                        </h1>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <p style="font-size: 16px">Por favor haz click en este botón para confirmar la cuenta del
+                            {% if user_type == 'ADMIN' %} usuario {% else %} estudiante {% endif %}
+                            <strong>{{ user_full_name }}.</strong></p>
+                    </td>
+                </tr>
+                <br/>
+                <tr>
+                    <table align="center" border="0" cellpadding="0" cellspacing="0" width="50%">
+                        <td style="border-radius: 20px; border: 20px none transparent;  text-align: center; font-family: Arial, Helvetica, sans-serif; font-size: 12px; padding: 10px 10px; font-weight: bold; background-color: rgb(255,221,9);"
+                            class="bmeButtonText">
+                            <span style="font-family: Tahoma, Arial, Helvetica, sans-serif; font-size: 16px; color: rgb(255, 255, 255);">
+                                <a href="{{ site }}" style="color:#FFFFFF;text-decoration:none;" target="_blank">Activar cuenta</a></span>
+                        </td>
+                    </table>
+                </tr>
+                <br/>
+                <hr color="#095094" size="1px">
+                <tr>
+                    <td bgcolor="#ffffff" style="padding: 15px 15px 15px 15px; text-align: center; color:#095094;">
+                        <p style="text-align: center">
+                            Este es un proyecto en el cual se implementa un chatbot con interconexion
+                            a inteligencia artificial en el area de enseñanza de competencias ciudadnas.
+                        </p>
+                    </td>
+                </tr>
+                <tr>
+                    <table border="0" cellpadding="0" cellspacing="0" width="600">
+                        <tr>
+                            <td style="font-size: 0; line-height: 0;" width="100">
+                            </td>
+                            <td style="color:#095094;">
+                                <h3>Investigadores:</h3>
+                                <p style="text-align: justify">
+                                    Ing Luis Fernando<br/>
+                                    Ing Henry Guío<br/>
+                                    Lic. Jose Rodriguez<br/>
+                                    Ing Nicolas Echeverria
+                                </p>
+                            </td>
+                            <td style="color:#095094;">
+                                <h3>Desarrolladores:</h3>
+                                <p style="text-align: justify">
+                                    Lizeth Cipamocha<br/>
+                                    Rafael Pinzón<br/>
+                                    Marcela Rincón<br/>
+                                    Fernanda Molina
+                                </p>
+                            </td>
+                        </tr>
+                    </table>
+                </tr>
+                <tr>
+                    <td bgcolor="#095094" style="padding: 5px 5px 5px 5px; text-align: center; color:#ffffff;">
+                        <h4>
+                            @CopyRight
+                        </h4>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+</body>
+</html>
