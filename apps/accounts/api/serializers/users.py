@@ -1,10 +1,8 @@
 # Django REST framework
-from django.contrib.auth import password_validation
+from rest_framework import serializers
 # Django
 from django.core.exceptions import ValidationError
-from django.core.validators import FileExtensionValidator
-
-from rest_framework import serializers
+from django.contrib.auth import password_validation
 
 # Models
 from apps.accounts.models import User
@@ -66,9 +64,21 @@ class UserStudentSerializer(serializers.ModelSerializer):
         read_only_fields = ('first_name', 'last_name', 'email', 'birthday_date', 'photo')
 
 
+class UserInvitedSerializer(serializers.ModelSerializer):
+    """
+    UserGenericInSerializer is the serializer for type user generic
+    """
+
+    class Meta:
+        model = User
+        fields = (
+            'first_name', 'last_name', 'email', 'birthday_date', 'photo', 'username', 'type_user'
+        )
+
+
 class ChangePasswordSerializer(serializers.Serializer):
     """
-    Serializer for password change endpoint.
+    ChangePasswordSerializer is the Serializer for password change endpoint.
     """
 
     old_password = serializers.CharField(required=True)
@@ -76,6 +86,7 @@ class ChangePasswordSerializer(serializers.Serializer):
     new_password_confirmation = serializers.CharField(required=True)
 
     def validate_old_password(self, value):
+        """This function returns the validate old password field"""
         if not self.instance.check_password(value):
             raise serializers.ValidationError(
                 'Su contraseña actual es incorrecta.Por favor ingresala de nuevo.'
@@ -83,6 +94,7 @@ class ChangePasswordSerializer(serializers.Serializer):
         return value
 
     def validate(self, data):
+        """This function returns the validated new password field"""
 
         if data['new_password'] != data['new_password_confirmation']:
             raise serializers.ValidationError(
@@ -96,15 +108,20 @@ class ChangePasswordSerializer(serializers.Serializer):
         return data
 
     def update(self, instance, validated_data):
+        """This function update new password field """
         self.instance.set_password(validated_data['new_password_confirmation'])
         self.instance.save(update_fields=['password', 'updated_at'])
         return self.instance
 
 
 class UpdateAvatarSerializer(serializers.Serializer):
+    """
+    UpdateAvatarSerializer is the serializer to update the user's avatar
+    """
     photo = serializers.CharField(required=True)
 
     def update(self, instance, validated_data):
+        """This function is used for update the user's avatar"""
         instance.photo = validated_data['photo']
         instance.save(update_fields=['photo', 'updated_at'])
         return instance

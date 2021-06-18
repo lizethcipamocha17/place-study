@@ -4,12 +4,18 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-# From models
+# Models
 from apps.accounts.models import User
 
 # Serializers
-from apps.accounts.api.serializers.users import UserStudentSerializer, UserTeacherSerializer, ChangePasswordSerializer, \
-    UserAdminSerializer, UpdateAvatarSerializer
+from apps.accounts.api.serializers.users import (
+    UserStudentSerializer,
+    UserTeacherSerializer,
+    ChangePasswordSerializer,
+    UserAdminSerializer,
+    UpdateAvatarSerializer,
+    UserInvitedSerializer
+)
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -19,7 +25,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get', 'put', 'patch'])
     def profile(self, request):
-        """User profile"""
+        """Service for user profile"""
 
         user = request.user
         user_serializer = None
@@ -31,25 +37,30 @@ class UserViewSet(viewsets.ModelViewSet):
                 user_serializer = UserTeacherSerializer(user)
             elif user.type_user == User.Type.ADMIN:
                 user_serializer = UserAdminSerializer(user)
+            else:
+                user_serializer = UserInvitedSerializer(user)
             return Response(user_serializer.data, status=status.HTTP_200_OK)
         else:
-            """update user"""
+            """Service for update user profile"""
             partial = request.method == 'PATCH'
 
             if user.type_user == User.Type.STUDENT:
                 user_serializer = self.get_serializer(user, data=request.data, partial=partial)
             elif user.type_user == User.Type.TEACHER:
                 user_serializer = UserTeacherSerializer(user, data=request.data, partial=partial)
-                print("REQUEST DATA", request.data)
             elif user.type_user == User.Type.ADMIN:
                 user_serializer = UserAdminSerializer(user, data=request.data, partial=partial)
-
+            else:
+                user_serializer = UserInvitedSerializer(user, data=request.data, partial=partial)
             user_serializer.is_valid(raise_exception=True)
             user_serializer.save()
             return Response(user_serializer.data, status=status.HTTP_201_CREATED)
 
+        #def change email  ---------- no eliminar
+
     @action(detail=False, methods=['put'])
     def avatar(self, request):
+        """Service for save url of avatar"""
         serializer = UpdateAvatarSerializer(request.user, data=request.data)
 
         if serializer.is_valid():
@@ -59,7 +70,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['post'], url_path='change-password')
     def change_password(self, request):
-        """Update password"""
+        """Service for update user's password"""
         serializer = ChangePasswordSerializer(request.user, data=request.data)
 
         if serializer.is_valid():

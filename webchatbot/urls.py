@@ -24,7 +24,7 @@ urlpatterns = [
                   # Django Allauth
                   path('accounts/', include('allauth.urls')),
 
-                  path('api/', include('apps.accounts.urls'), name='accounts'),
-                  path('api/', include('apps.schools.urls'), name='schools')
+                  path('api/', include('apps.accounts.api.urls'), name='accounts'),
+                  path('api/', include('apps.schools.api.urls'), name='schools')
 
               ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

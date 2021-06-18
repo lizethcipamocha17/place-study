@@ -1,32 +1,30 @@
 # Django REST framework
 from datetime import datetime
-
-# Py JWT
-# Django
-from django.contrib.sessions.models import Session
 from rest_framework import status, viewsets
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+# Django
+from django.contrib.sessions.models import Session
+
+# Serializers
 from apps.accounts.api.serializers.accounts_api import (
     UserLoginSerializer,
     UserModelSerializer,
     UserSignUpSerializer,
     AccountActivationSerializer, VerifyTokenSerializer, ResetPasswordSerializer, PasswordResetFromKeySerializer,
 )
-# Serializers
 from apps.accounts.api.serializers.users import UserStudentSerializer
 
 
 class AccountViewSet(viewsets.GenericViewSet):
-    # serializer_class = UserSignUpSerializer
 
-    # Detail define si es una petición de detalle o no, en methods añadimos el método permitido,
-    # en nuestro caso solo vamos a permitir posts
     @action(detail=False, methods=['post'])
     def login(self, request):
-        """User sign in."""
+        """
+        Service for user sign in.
+        """
         serializer = UserLoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user, token = serializer.save()
@@ -39,7 +37,9 @@ class AccountViewSet(viewsets.GenericViewSet):
 
     @action(detail=False, methods=['post'])
     def signup(self, request):
-        """User sign up."""
+        """
+        Service for user sign up.
+        """
         data = request.data
         serializer = UserSignUpSerializer(data=data, context={'request': request})
         serializer.is_valid(raise_exception=True)
@@ -52,9 +52,12 @@ class AccountViewSet(viewsets.GenericViewSet):
 
     @action(detail=False, methods=['Post'], url_path='reset-password-email')
     def reset_password_email(self, request):
+        """
+        Service for send email to retrieve a user's account password
+        with a url to access the website
+        """
         data = request.data
         serializer = ResetPasswordSerializer(data=data, context={'request': request})
-        print('SERIALIZER', serializer, data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         res = {
@@ -65,6 +68,9 @@ class AccountViewSet(viewsets.GenericViewSet):
 
     @action(detail=False, methods=['post'])
     def logout(self, request, *args, **kwargs):
+        """
+        Service for close user sessions
+        """
         try:
 
             token = request.data.get('token')
@@ -93,12 +99,18 @@ class AccountViewSet(viewsets.GenericViewSet):
 
     @action(detail=False, methods=['delete'], url_path='delete')
     def delete_account(self, request):
+        """
+        Service for delete a user's account
+        """
         request.user.is_active = False
         request.user.save()
         return Response({'message': 'Su cuenta se ha eliminado correctamente'}, status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=False, methods=['post'], url_path='activation')
     def account_activation(self, request):
+        """
+        Service to enable sing in to the student or guest
+        """
         serializer = AccountActivationSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -110,6 +122,9 @@ class AccountViewSet(viewsets.GenericViewSet):
 
     @action(detail=False, methods=['post'], url_path='password-reset-from-key')
     def password_reset_from_key(self, request):
+        """
+        Service for user's password reset
+        """
         serializer = PasswordResetFromKeySerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -119,9 +134,11 @@ class AccountViewSet(viewsets.GenericViewSet):
         }
         return Response(data, status=status.HTTP_200_OK)
 
-
     @action(detail=False, methods=['post'], url_path='verify-token')
     def verify_token(self, request):
+        """
+        Service for verify standard of token
+        """
         serializer = VerifyTokenSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = {

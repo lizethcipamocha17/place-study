@@ -1,26 +1,50 @@
+# Django Rest Framework
 from rest_framework import serializers
+
+# Models
 from apps.accounts.models import User
 from apps.schools.models import School, Content, Comment, Like
 
 
 class SchoolSerializer(serializers.ModelSerializer):
+    """
+    SchoolSerializer is serializer of school
+    """
+
     class Meta:
         model = School
         fields = '__all__'
 
+
 class ContentSerializer(serializers.ModelSerializer):
+    """
+    ContentSerializer is serializer of content
+    """
+    likes = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = Content
         fields = '__all__'
 
+    def get_likes(self, obj):
+        """This function returns all likes by content"""
+        return Like.objects.filter(content=obj).count()
+
 
 class UserListRelatedSerializer(serializers.ModelSerializer):
+    """
+    UserListRelatedSerializer is serializer of  user list related
+    """
+
     class Meta:
         model = User
         fields = ('first_name', 'last_name', 'username')
 
 
 class CommentCreateSerializer(serializers.Serializer):
+    """
+    CommentCreateSerializer is serializer of  comment create
+    """
     user = serializers.HiddenField(
         default=serializers.CurrentUserDefault()
     )
@@ -28,12 +52,10 @@ class CommentCreateSerializer(serializers.Serializer):
     text = serializers.CharField(min_length=10, max_length=100, required=True)
 
     def save(self, **kwargs):
+        """This function save the comments """
         comment, created = Comment.objects.get_or_create(
             user=self.validated_data['user'], content=self.context['content'], text=self.validated_data['text']
         )
-
-        # mirar si el pk content existe
-        # if self.context['content']
 
         if not created:
             raise serializers.ValidationError('solo puedes comentar una vez por publicación.')
@@ -41,6 +63,9 @@ class CommentCreateSerializer(serializers.Serializer):
 
 
 class CommentListSerializer(serializers.ModelSerializer):
+    """
+    CommentListSerializeris the serializer of the comment list
+    """
     user = UserListRelatedSerializer(read_only=True)
 
     class Meta:
@@ -48,26 +73,18 @@ class CommentListSerializer(serializers.ModelSerializer):
         fields = ('text', 'content', 'user')
 
 
-class LikeUpdateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Like
-        fields = ('content', 'like',)
+class LikeCreateSerializer(serializers.Serializer):
+    """
+    LikeCreateSerializer is serializer of like create
+    """
+    user = serializers.HiddenField(
+        default=serializers.CurrentUserDefault()
+    )
 
     def create(self, data):
-        like, created = Like.objects.get_or_create(content_id=self.data['content'], user=self.instance)
+        """This function creates like by content"""
+        content = self.context['content']
+        user = self.validated_data['user']
 
-        if not created:
-            like.delete()
-
-        return self.context['content'], like
-
-
-class LikeListSerializer(serializers.ModelSerializer):
-    user = UserListRelatedSerializer(read_only=True)
-
-    class Meta:
-        model = Like
-        fields = ('content', 'like', 'user')
-
-    def get_total_likes(self, instance):
-        return instance.liked_by.all().count()
+        like, created = Like.objects.get_or_create(content=content, user=user, like=True)
+        return like

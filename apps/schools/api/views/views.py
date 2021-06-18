@@ -1,24 +1,27 @@
 # Django REST framework
-from django.shortcuts import _get_queryset
-from rest_framework.exceptions import PermissionDenied, ParseError
+from rest_framework.exceptions import PermissionDenied, ParseError, NotFound
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework import status, viewsets
 # Models
-from apps.accounts.api.serializers.users import UserTeacherListRelatedSerializer
 from apps.accounts.models import User
 from apps.schools.models import School, Content, Comment, Like
 # Serializers
+from apps.accounts.api.serializers.users import UserTeacherListRelatedSerializer
 from apps.schools.api.serializers.serializers import (
     SchoolSerializer,
     ContentSerializer,
     CommentListSerializer,
     CommentCreateSerializer,
-    LikeListSerializer, LikeUpdateSerializer)
+    LikeCreateSerializer)
+# Utils
+from apps.utils.utils import parse_int
 
 
 # Create your views here.
+
+
 class SchoolViewSet(viewsets.ModelViewSet):
     queryset = School.objects.all()
     serializer_class = SchoolSerializer
@@ -54,92 +57,94 @@ class ContentViewSet(viewsets.ModelViewSet):
     serializer_class = ContentSerializer
     lookup_url_kwarg = 'pk3'
 
-    def get_queryset(self, pk=None):
+    def get_queryset(self, pk=None, pk3=None):
+        """This function returns a content filtered by a primary key"""
         school = self.request.user.school_id
-        try:
-            pk = int(pk)
-        except Exception:
-            raise ParseError(detail='Solicitud con formato incorrecto.')
 
-        if school != pk:
+        if school != parse_int(pk):
             raise PermissionDenied(detail='No tienes permiso para realizar esta acción.')
-        return Content.objects.filter(school_id=school)
+
+        queryset = Content.objects.filter(school_id=school)
+
+        if pk3 is not None:
+            pk3 = parse_int(pk3)
+            queryset = queryset.filter(pk=pk3).first()
+            if queryset is None:
+                raise NotFound(detail='El contenido no existe o no tienes permiso para visualizarlo')
+            return queryset
+
+        return queryset
+
+    def retrieve(self, request, pk=None, pk3=None, *args, **kwargs):
+        """This function return a content"""
+        content_serializer = ContentSerializer(self.get_queryset(pk, pk3))
+        return Response(content_serializer.data)
 
     def list(self, request, pk=None, *args, **kwargs):
         """
-        List all Contents for user loged and school
+        Service for list all Contents for user loged and school
         """
-        # obtener el colegio del usuario logeado  school_id
-        # consulta a la tabla contenido filtrando el id del colegio
         content_serializer = ContentSerializer(self.get_queryset(pk), many=True)
         return Response(content_serializer.data)
 
-    @action(detail=True, methods=['post', 'get'])
-    def like(self, request, pk=None, *args, **kwargs):
+    @action(detail=True, methods=['post', 'delete'])
+    def like(self, request, pk=None, pk3=None, *args, **kwargs):
         """
-        Create like for content
+        Service for create like for a content and return number likes
         """
-        # crear like se neceita decir a que content_id y que usuario es
-        # quien da like, mas el like  # mostrar.........
-        user = request.user
+        content = self.get_queryset(pk, pk3)
         if request.method == 'POST':
-            serializer = LikeUpdateSerializer(user, data=request.data)
+            serializer = LikeCreateSerializer(context={'request': request, 'content': content}, data=request.data)
             serializer.is_valid(raise_exception=True)
-            content, like = serializer.save()
+            like = serializer.save()
+            likes = Like.objects.filter(content=content).count()
             data = {
-                'content': LikeListSerializer(content).data,
-                'like': True
+                'content': ContentSerializer(content).data,
+                'like': like.like,
+                'likes': likes
             }
             return Response({'data': data}, status=status.HTTP_201_CREATED)
 
-        # else:
-        #     likes = Like.objects.all().filter(content_id=pk)
-        #     like_count = likes.count()
-        #     serializer_class = LikeListSerializer(request.user, likes, many=True)
-        #     return Response(serializer_class.data)
-
-        # user = request.user.user_id
-        # if request.method == 'POST':
-        #     serializer = LikeUpdateSerializer(user, data=request.data)
-        #     if serializer.is_valid():
-        #         serializer.save()
-        #         return Response(serializer.data, status=status.HTTP_201_CREATED)
-        #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        # else:
-        #     likes = Like.objects.all().filter(content_id=pk)
-        #     like_count = likes.count()
-        #     serializer_class = LikeListSerializer(request.user, likes, many=True)
-        #     return Response(serializer_class.data)
+        else:
+            like = Like.objects.filter(content=content, user=request.user).first()
+            """Service for delete like and returns update number likes"""
+            if like is None:
+                raise ParseError('No haz reaccionado a este contenido')
+            like.delete()
+            likes = Like.objects.filter(content=content).count()
+            data = {
+                'content': ContentSerializer(content).data,
+                'like': False,
+                'likes': likes
+            }
+            return Response({'data': data}, status=status.HTTP_204_NO_CONTENT)
 
 
-# school/1/contents/1/coments           PREGUNTAR EL ID SCHOOL EN EL ENDPORINT PERCHÉ??
 class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
     permission_classes = (IsAuthenticated,)
     serializer_class = CommentListSerializer
     lookup_url_kwarg = 'pk4'
 
-    #   traer el nombre de usuario (usuario logeado) que hace el comentario
-    #   introducir(pedir) texto del comentario, id_contenido pedirlo
-    def create(self, request, pk3=None, *args, **kwargs):
+    def create(self, request, pk=None, pk3=None, *args, **kwargs):
         """
-        Create comment for content
+        Service for create comment for content
         """
-        print("PK3", pk3)
         content_model_viewset = ContentViewSet(request=request)
-        content = content_model_viewset.retrieve(request, *args, **kwargs).data
-        print("CONTENT", content)
-        serializer = CommentCreateSerializer(context={'request': request, 'content': pk3}, data=request.data)
+        content = content_model_viewset.get_queryset(pk=pk, pk3=pk3)
+        serializer = CommentCreateSerializer(context={'request': request, 'content': content}, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def list(self, request, pk3=None, *args, **kwargs):
+    def list(self, request, pk=None, pk3=None, *args, **kwargs):
         """
-        List all Comments by content
+        Service for list all Comments by content
         """
+        content_model_viewset = ContentViewSet(request=request)
+        content = content_model_viewset.get_queryset(pk=pk, pk3=pk3)
 
-        queryset = Comment.objects.filter(content_id=pk3)
+        queryset = Comment.objects.filter(content=content)
         comment_serializer = CommentListSerializer(queryset, many=True).data
         return Response(comment_serializer)

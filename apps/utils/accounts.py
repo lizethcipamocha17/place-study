@@ -1,15 +1,17 @@
+# PyJWT
 import jwt
+# Django
 from django.conf import settings
 from django.contrib.auth import password_validation
-from django.contrib.sites.shortcuts import get_current_site
-from django.core.mail import EmailMultiAlternatives
-from django.template.loader import render_to_string
 from django.utils import timezone
+# Django REST Framework
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 
 def verify_token(token, token_type=None):
+    """This function validates the token type and its expiration date"""
+
     try:
         payload = jwt.decode(token, settings.SECRET_KEY_TOKEN, algorithms="HS256")
     except jwt.ExpiredSignatureError:
@@ -23,19 +25,9 @@ def verify_token(token, token_type=None):
     return payload
 
 
-def send_email(subject, from_email, to, template, context):
-    content = render_to_string(template, context)
-    msg = EmailMultiAlternatives(subject, content, from_email, [to])
-    msg.attach_alternative(content, "text/html")
-    return msg.send()
-
-
-def get_site_domain(request):
-    current_site = get_current_site(request).domain
-    return f'{request.scheme}://{current_site}'
-
-
 def create_token_jwt(sub, expiration_date, data):
+    """This function returns a JWT token"""
+
     encoded_jwt = jwt.encode({
         'exp': timezone.now() + expiration_date,
         'iat': timezone.now(),
@@ -46,6 +38,8 @@ def create_token_jwt(sub, expiration_date, data):
 
 
 def validate_password(data, instance):
+    """This function returns the validation of a password"""
+
     if data['password'] != data['password_confirm']:
         raise serializers.ValidationError(
             {'password_confirm': "Los campos de la contraseña nueva no coinciden."})

@@ -2,7 +2,7 @@ from django.core.validators import FileExtensionValidator
 from django.db import models
 
 
-def upload_to(filename):
+def upload_to(instance ,filename):
     return 'content/{filename}'.format(filename=filename)
 
 
