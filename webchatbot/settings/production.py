@@ -1,8 +1,9 @@
 
 from .base import *
 
-DEBUG = config('DEBUG')
-ALLOWED_HOSTS = ['*']
+# DEBUG = config('DEBUG')
+DEBUG = True
+ALLOWED_HOSTS = ['https://djangoapichatbot.herokuapp.com/']
 
 DATABASES = {
     'default': {
