@@ -1,4 +1,3 @@
-
 from .base import *
 
 DATABASES = {
@@ -11,3 +10,4 @@ DATABASES = {
         'PORT': config('DB_PORT')  # env
     }
 }
+STATICFILES_DIRS = (BASE_DIR, 'static')
