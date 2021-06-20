@@ -1,10 +1,6 @@
 
 from .base import *
 
-DEBUG = config('DEBUG')
-# DEBUG = True
-ALLOWED_HOSTS = ['https://djangoapichatbot.herokuapp.com/']
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
