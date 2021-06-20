@@ -127,20 +127,6 @@ AUTHENTICATION_BACKENDS = [
 
 WSGI_APPLICATION = 'webchatbot.wsgi.application'
 
-# Database
-# https://docs.djangoproject.com/en/3.0/ref/settings/#databases
-
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'HOST': config('DB_HOST'),  # env
-        'NAME': config('DB_NAME'),  # env
-        'USER': config('DB_USER'),  # env
-        'PASSWORD': config('DB_PWD'),  # env
-        'PORT': config('DB_PORT')  # env
-    }
-}
 
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
