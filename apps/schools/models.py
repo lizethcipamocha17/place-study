@@ -2,15 +2,15 @@ from django.core.validators import FileExtensionValidator
 from django.db import models
 
 
-def upload_to(instance ,filename):
+
+def upload_to(instance, filename):
     return 'content/{filename}'.format(filename=filename)
 
 
 # Create your models here.
 class School(models.Model):
     school_id = models.BigAutoField(primary_key=True)
-    location = models.ForeignKey('accounts.Location', on_delete=models.CASCADE, related_name='School',
-                                 verbose_name='Departamento')
+    location = models.ForeignKey('accounts.Location', on_delete=models.CASCADE, verbose_name='ubicación')
     school_name = models.CharField('nombre del colegio', max_length=120)
 
     class Meta:
@@ -19,8 +19,8 @@ class School(models.Model):
         verbose_name_plural = 'colegios'
         ordering = ['school_name']
 
-    # def __str__(self):
-    #     return self.school_name
+    def __str__(self):
+        return self.school_name
 
 
 class Content(models.Model):

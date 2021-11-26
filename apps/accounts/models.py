@@ -153,9 +153,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     def full_name(self):
         return f'{self.first_name} {self.last_name}'
 
-    # def type_user_teacher(self):
-    #     return self.type_user.find('Docente')
-
 
 class Log(models.Model):
     log_id = models.BigAutoField(primary_key=True)

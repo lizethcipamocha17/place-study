@@ -1,12 +1,49 @@
 # Django REST framework
-from rest_framework import serializers
+from django.contrib.auth import password_validation
 # Django
 from django.core.exceptions import ValidationError
-from django.contrib.auth import password_validation
+from rest_framework import serializers
 
 # Models
 from apps.accounts.models import User
 from apps.schools.api.serializers.serializers import SchoolSerializer
+
+from apps.utils.accounts import validate_password
+
+
+class UserCreateSerializer(serializers.ModelSerializer):
+    password_confirm = serializers.CharField(min_length=8)
+
+    class Meta:
+        model = User
+        exclude = (
+            'is_superuser', 'is_staff', 'last_login', 'created_at', 'updated_at', 'groups', 'user_permissions', 'terms'
+        )
+
+    def validate(self, data):
+        """Verify passwords match"""
+        return validate_password(data, self.instance)
+
+    def create(self, validated_data):
+        validated_data.pop("password_confirm")
+        user = User(**validated_data)
+        user.set_password(validated_data['password'])
+        user.terms = True
+        if self.validated_data['type_user'] == User.Type.STUDENT:
+            user.is_superuser = False
+        elif self.validated_data['type_user'] == User.Type.TEACHER:
+            user.is_staff = True
+            user.is_superuser = False
+        else:
+            user.is_superuser = True
+        user.save()
+        return user
+
+
+class UserUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        exclude = ('password', 'last_login', 'created_at', 'updated_at', 'groups', 'user_permissions')
 
 
 class UserAdminSerializer(serializers.ModelSerializer):
@@ -45,9 +82,18 @@ class UserTeacherListRelatedSerializer(serializers.ModelSerializer):
         fields = (
             'first_name', 'last_name', 'email', 'photo', 'username'
         )
+        read_only_fields = ('email',)
 
 
-class UserStudentSerializer(serializers.ModelSerializer):
+class UserListSerializer(serializers.ModelSerializer):
+    teacher = UserTeacherListRelatedSerializer(read_only=True)
+
+    class Meta:
+        model = User
+        exclude = ('password', 'groups', 'user_permissions')
+
+
+class UserStudentListSerializer(serializers.ModelSerializer):
     """
     UserStudentSerializer is the serializer for type user students
     """
@@ -59,7 +105,7 @@ class UserStudentSerializer(serializers.ModelSerializer):
         model = User
         fields = (
             'first_name', 'last_name', 'email', 'teacher', 'birthday_date', 'photo', 'username', 'school',
-            'type_user'
+            'type_user', 'terms'
         )
         read_only_fields = ('first_name', 'last_name', 'email', 'birthday_date', 'photo')
 

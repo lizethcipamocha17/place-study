@@ -10,12 +10,13 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
-import os
-from decouple import config, Csv
-from datetime import timedelta
+from pathlib import Path
 
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+from datetime import timedelta
+from decouple import config, Csv
+
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
@@ -38,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites',
+    'corsheaders',
 
     # apps local
     'apps.accounts',
@@ -48,18 +50,13 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
 
-    # django all-auth
-    'allauth',
-    'allauth.account',
-    'allauth.socialaccount',
-
     # django cleanup
     'django_cleanup',
 ]
 X_FRAME_OPTIONS = 'SAMEORIGIN'  # only if django version >= 3.0
 
-LOGIN_REDIRECT_URL = '/'
-LOGOUT_REDIRECT_URL = '/'
+# LOGIN_REDIRECT_URL = '/'
+# LOGOUT_REDIRECT_URL = '/'
 
 AUTH_USER_MODEL = 'accounts.User'
 
@@ -83,6 +80,7 @@ SECRET_KEY_TOKEN = config('SECRET_KEY_TOKEN')
 JWT_ACTIVATION_ACCOUNT_EXPIRE_DELTA = timedelta(
     days=1)  # Numero de días para que expire el email de verificacion de cuenta
 JWT_RESET_PASSWORD_EXPIRE_DELTA = timedelta(minutes=15)
+JWT_CHANGE_EMAIL_CONFIRMATION_EXPIRE_DELTA = timedelta(minutes=15)
 
 ACCOUNT_FORMS = {
     # 'login': 'apps.accounts.forms.CustomLoginForm',
@@ -93,11 +91,12 @@ ACCOUNT_FORMS = {
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
+    "django.middleware.common.CommonMiddleware",
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware'
 ]
 
 ROOT_URLCONF = 'webchatbot.urls'
@@ -105,7 +104,7 @@ ROOT_URLCONF = 'webchatbot.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        'DIRS': [BASE_DIR.parent / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -121,12 +120,10 @@ TEMPLATES = [
 AUTHENTICATION_BACKENDS = [
 
     'django.contrib.auth.backends.AllowAllUsersModelBackend',
-    'allauth.account.auth_backends.AuthenticationBackend',
 
 ]
 
 WSGI_APPLICATION = 'webchatbot.wsgi.application'
-
 
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
@@ -146,12 +143,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication',
-    ]
-}
-
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/
 
@@ -168,15 +159,16 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
-STATIC_ROOT = os.path.join(BASE_DIR, "static_cdn", "static_root")
+
 STATIC_URL = "/static/"
 
-STATICFILES_DIRS = (
-    os.path.join(BASE_DIR, "static"),
-)
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:9014",
+]
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+MEDIA_ROOT = BASE_DIR.parent / 'media'
 
 # Admin
 ADMIN_URL = config('DJANGO_ADMIN_URL')

@@ -10,4 +10,5 @@ DATABASES = {
         'PORT': config('DB_PORT')  # env
     }
 }
-STATICFILES_DIRS = (BASE_DIR, 'static')
+
+STATIC_ROOT = BASE_DIR.parent / 'static'

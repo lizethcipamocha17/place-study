@@ -8,6 +8,10 @@ from django.utils import timezone
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
+ACCOUNT_ACTIVATION_TOKEN_TYPE = 'account_activation'
+RESET_PASSWORD_TOKEN_TYPE = 'reset_password'
+CHANGE_EMAIL_CONFIRMATION = 'change_email_confirmation'
+
 
 def verify_token(token, token_type=None):
     """This function validates the token type and its expiration date"""

@@ -24,7 +24,11 @@ class ContentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Content
-        fields = '__all__'
+        # fields = '__all__'
+        exclude = ('school',)
+
+    def create(self, validated_data):
+        return Content.objects.create(school=self.context['school'], **validated_data)
 
     def get_likes(self, obj):
         """This function returns all likes by content"""

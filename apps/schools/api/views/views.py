@@ -26,12 +26,44 @@ class SchoolViewSet(viewsets.ModelViewSet):
     queryset = School.objects.all()
     serializer_class = SchoolSerializer
 
+    def create(self, request, *args, **kwargs):
+        user = request.user
+        if user.is_authenticated and user.type_user == User.Type.ADMIN:
+            serializer = SchoolSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        raise PermissionDenied(detail="No tienes permiso para realizar esta acción")
+
     def list(self, request, *args, **kwargs):
         """
         List all Schools
         """
         school_serializer = SchoolSerializer(self.queryset, many=True)
         return Response(school_serializer.data)
+
+    # dudaa-----------------
+    def update(self, request, *args, **kwargs):
+        if request.user.type_user != User.Type.ADMIN:
+            raise PermissionDenied(detail="No tienes permiso para realizar esta acción")
+        user = self.get_object()
+        partial = request.method == 'PATCH'
+        serializer = SchoolSerializer(user, data=request.data, partial=partial, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                {'message': 'Colegio actualizado correctamente', 'data': serializer.data},
+                status=status.HTTP_200_OK
+            )
+        return Response({'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+    def destroy(self, request, *args, **kwargs):
+        """"""
+        if request.user.type_user != User.Type.ADMIN:
+            raise PermissionDenied(detail="No tienes permiso para realizar esta acción")
+        school = self.get_object()
+        school.delete()
+        return Response({'message': 'El colegio fue eliminado correctamente'}, status=status.HTTP_204_NO_CONTENT)
 
 
 class TeacherViewSet(viewsets.ModelViewSet):
@@ -75,16 +107,16 @@ class ContentViewSet(viewsets.ModelViewSet):
 
         return queryset
 
-    def retrieve(self, request, pk=None, pk3=None, *args, **kwargs):
-        """This function return a content"""
-        content_serializer = ContentSerializer(self.get_queryset(pk, pk3))
-        return Response(content_serializer.data)
-
     def list(self, request, pk=None, *args, **kwargs):
         """
         Service for list all Contents for user loged and school
         """
         content_serializer = ContentSerializer(self.get_queryset(pk), many=True)
+        return Response(content_serializer.data)
+
+    def retrieve(self, request, pk=None, pk3=None, *args, **kwargs):
+        """This function return a content"""
+        content_serializer = ContentSerializer(self.get_queryset(pk, pk3))
         return Response(content_serializer.data)
 
     @action(detail=True, methods=['post', 'delete'])
@@ -118,6 +150,55 @@ class ContentViewSet(viewsets.ModelViewSet):
                 'likes': likes
             }
             return Response({'data': data}, status=status.HTTP_204_NO_CONTENT)
+
+
+class UserContentsViewSet(viewsets.ModelViewSet):
+    """
+    UserContentsViewSet Used by users with teacher role
+    """
+    permission_classes = (IsAuthenticated,)
+    serializer_class = ContentSerializer
+
+    def get_queryset(self):
+        return Content.objects.filter(school__user=self.request.user)
+
+    def create(self, request, *args, **kwargs):
+        if request.user.type_user != User.Type.TEACHER:
+            raise PermissionDenied(detail="No tienes permiso para realizar esta acción")
+
+        serializer = self.get_serializer(data=request.data, context={'school': request.user.school})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def list(self, request, *args, **kwargs):
+        if request.user.type_user != User.Type.TEACHER:
+            raise PermissionDenied(detail="No tienes permiso para realizar esta acción")
+
+        queryset = self.filter_queryset(self.get_queryset())
+        page = self.paginate_queryset(queryset)
+        serializer = self.get_serializer(page, many=True)
+        return self.get_paginated_response(serializer.data)
+
+    def update(self, request, *args, **kwargs):
+        if request.user.type_user != User.Type.TEACHER:
+            raise PermissionDenied(detail="No tienes permiso para realizar esta acción")
+
+        content = self.get_object()
+        partial = request.method == 'PATCH'
+        serializer = self.get_serializer(content, data=request.data, partial=partial, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'message': 'Contenido actualizado correctamente','data': serializer.data}, status=status.HTTP_200_OK)
+        return Response({'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+    def destroy(self, request, *args, **kwargs):
+        """"""
+        if request.user.type_user != User.Type.TEACHER:
+            raise PermissionDenied(detail="No tienes permiso para realizar esta acción")
+        content = self.get_object()
+        content.delete()
+        return Response({'message': 'El contenido fue eliminado correctamente'}, status=status.HTTP_204_NO_CONTENT)
 
 
 class CommentViewSet(viewsets.ModelViewSet):

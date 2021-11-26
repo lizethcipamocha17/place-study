@@ -1,19 +1,25 @@
 # Django
 from django.conf import settings
 from django.contrib.auth import authenticate
-
 # Rest Framework
+from django.utils import timezone
 from rest_framework import serializers
 from rest_framework.authtoken.models import Token
 
 # Models
+from rest_framework.exceptions import PermissionDenied
+
 from apps.accounts.models import User
 # Utils
-from apps.utils.accounts import verify_token, create_token_jwt, validate_password
+from apps.utils.accounts import (
+    verify_token,
+    create_token_jwt,
+    validate_password,
+    CHANGE_EMAIL_CONFIRMATION,
+    RESET_PASSWORD_TOKEN_TYPE,
+    ACCOUNT_ACTIVATION_TOKEN_TYPE
+)
 from apps.utils.utils import send_email, get_site_domain
-
-ACCOUNT_ACTIVATION_TOKEN_TYPE = 'account_activation'
-RESET_PASSWORD_TOKEN_TYPE = 'reset_password'
 
 
 class UserModelSerializer(serializers.ModelSerializer):
@@ -50,10 +56,17 @@ class UserLoginSerializer(serializers.Serializer):
 
     def create(self, data):
         """Generate or retrieve token."""
-        token, created = Token.objects.get_or_create(user=self.context['user'])
+        user = self.context['user']
+        token, created = Token.objects.get_or_create(user=user)
         if not created:
             token.delete()
-            token = Token.objects.create(user=self.context['user'])
+            token = Token.objects.create(user=user)
+
+        # verificar si inicia sesión por primera vez
+        self.context['first_time_login'] = True if user.last_login is None else False
+        user.last_login = timezone.now()
+        user.save(update_fields=['last_login'])
+
         return self.context['user'], token.key
 
 
@@ -112,7 +125,7 @@ class UserSignUpSerializer(serializers.ModelSerializer):
 
         subject = 'Verificación de cuenta de usuario'
         template = 'accounts/emails/account_activation.html'
-        send_email(subject, settings.DEFAULT_FROM_EMAIL, email, template, context)
+        # send_email(subject, settings.DEFAULT_FROM_EMAIL, email, template, context)
 
 
 class ResetPasswordSerializer(serializers.Serializer):
@@ -222,4 +235,70 @@ class PasswordResetFromKeySerializer(serializers.Serializer):
         user = User.objects.get(email=self.context['payload']['data']['email'], is_active=True)
         user.set_password(self.validated_data['password_confirm'])
         user.save(update_fields=['password', 'updated_at'])
+        return user
+
+
+class ChangeEmail(serializers.Serializer):
+    user = serializers.HiddenField(
+        default=serializers.CurrentUserDefault()
+    )
+    email = serializers.EmailField(required=True)
+
+    def validate_email(self, value):
+        user = User.objects.filter(email=value).first()
+        if user is not None:
+            raise serializers.ValidationError('Este correo electrónico ya esta asociado a una cuenta')
+        return value
+
+    def save(self, **kwargs):
+        """This function is used for save the new password """
+        user = self.validated_data['user']
+        if user.type_user == user.Type.STUDENT:
+            raise PermissionDenied(detail='No tiene permisos para actualizar el correo')
+
+        send = self.send_confirm_email(user, self.validated_data['email'])
+        self.context['send_email'] = True if send == 1 else False
+        return user
+
+    def send_confirm_email(self, user, email):
+        """This function send email so that the user can retrieve the password for the account"""
+        token_jwt = create_token_jwt(
+            email,
+            settings.JWT_CHANGE_EMAIL_CONFIRMATION_EXPIRE_DELTA,
+            data={
+                'email': email,
+                'type': CHANGE_EMAIL_CONFIRMATION,
+
+            },
+        )
+        url_site = get_site_domain(self.context['request'])
+        context = {
+            'first_name': user.first_name,
+            'site': f'{url_site}/accounts/email/change/{token_jwt}'
+        }
+
+        subject = 'Confirmación de cuenta de correo electrónico'
+        template = 'accounts/emails/change_email_confirmation.html'
+        return send_email(subject, settings.DEFAULT_FROM_EMAIL, email, template, context)
+
+
+class ConfirmEmailSerializer(serializers.Serializer):
+    """
+    PasswordResetFromKeySerializer is serializer for reset password.
+    """
+    user = serializers.HiddenField(
+        default=serializers.CurrentUserDefault()
+    )
+    token = serializers.CharField(max_length=555)
+
+    def validate_token(self, data):
+        """This function is used for validate token for rest password"""
+        self.context['payload'] = verify_token(data, CHANGE_EMAIL_CONFIRMATION)
+        return data
+
+    def save(self, **kwargs):
+        """This function is used to save the reset password"""
+        user = self.validated_data['user']
+        user.email = self.context['payload']['data']['email']
+        user.save(update_fields=['email', 'updated_at'])
         return user

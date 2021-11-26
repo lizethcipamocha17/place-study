@@ -3,6 +3,7 @@ from datetime import datetime
 from rest_framework import status, viewsets
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 # Django
@@ -13,9 +14,14 @@ from apps.accounts.api.serializers.accounts_api import (
     UserLoginSerializer,
     UserModelSerializer,
     UserSignUpSerializer,
-    AccountActivationSerializer, VerifyTokenSerializer, ResetPasswordSerializer, PasswordResetFromKeySerializer,
+    AccountActivationSerializer,
+    VerifyTokenSerializer,
+    ResetPasswordSerializer,
+    PasswordResetFromKeySerializer,
+    ChangeEmail,
+    ConfirmEmailSerializer
 )
-from apps.accounts.api.serializers.users import UserStudentSerializer
+from apps.accounts.api.serializers.users import UserStudentListSerializer
 
 
 class AccountViewSet(viewsets.GenericViewSet):
@@ -30,7 +36,8 @@ class AccountViewSet(viewsets.GenericViewSet):
         user, token = serializer.save()
         data = {
             'user': UserModelSerializer(user).data,
-            'access_token': token
+            'access_token': token,
+            'fist_time_login': serializer.context['first_time_login']
         }
         message_login = 'Inicio de sesión exitoso!'
         return Response({'data': data, 'message_login': message_login}, status=status.HTTP_201_CREATED)
@@ -45,7 +52,7 @@ class AccountViewSet(viewsets.GenericViewSet):
         serializer.is_valid(raise_exception=True)
         user, token = serializer.save()
         res = {
-            'user': UserStudentSerializer(user).data,
+            'user': UserStudentListSerializer(user).data,
             'acess_token': token
         }
         return Response(res, status=status.HTTP_201_CREATED)
@@ -144,5 +151,29 @@ class AccountViewSet(viewsets.GenericViewSet):
         data = {
             'success': True,
             'payload': serializer.context['payload']
+        }
+        return Response(data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['post'], url_path='email/change', permission_classes=[IsAuthenticated])
+    def change_email(self, request):
+        serializer = ChangeEmail(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        data = {
+            'send_email': serializer.context['send_email']
+        }
+        return Response(data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['post'], url_path='email/confirm', permission_classes=[IsAuthenticated])
+    def confirmation_email(self, request):
+        """
+        Service for user's password reset
+        """
+        serializer = ConfirmEmailSerializer(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        data = {
+            'success': True,
+            'message': 'Su correo electrónico ha sido actualizado'
         }
         return Response(data, status=status.HTTP_200_OK)

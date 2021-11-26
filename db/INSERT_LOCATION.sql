@@ -1,4 +1,4 @@
-INSERT INTO chatbot_final.public.location(location_id, location_name, location_type, location_father_id)
+INSERT INTO location(location_id, location_name, location_type, location_father_id)
 VALUES (1 ,'Colombia ','Pais ',null ),
 (2 ,'Amazonas ','Departamento ',1 ),
 (3 ,'Antioquia ','Departamento ',1 ),

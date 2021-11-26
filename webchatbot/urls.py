@@ -22,7 +22,7 @@ urlpatterns = [
                   # Django Admin
                   path(settings.ADMIN_URL, admin.site.urls),
                   # Django Allauth
-                  path('accounts/', include('allauth.urls')),
+                  path('views/accounts/', include('apps.accounts.urls')),
 
                   path('api/', include('apps.accounts.api.urls'), name='accounts'),
                   path('api/', include('apps.schools.api.urls'), name='schools')
