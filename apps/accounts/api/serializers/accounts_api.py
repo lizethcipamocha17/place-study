@@ -125,7 +125,7 @@ class UserSignUpSerializer(serializers.ModelSerializer):
 
         subject = 'Verificación de cuenta de usuario'
         template = 'accounts/emails/account_activation.html'
-        # send_email(subject, settings.DEFAULT_FROM_EMAIL, email, template, context)
+        send_email(subject, settings.DEFAULT_FROM_EMAIL, email, template, context)
 
 
 class ResetPasswordSerializer(serializers.Serializer):
