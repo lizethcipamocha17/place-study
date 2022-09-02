@@ -49,6 +49,29 @@ class Content(models.Model):
     def __str__(self):
         return self.name
 
+# class AppointmentMultimedia(models.Model):
+#     """Appointment Multimedia model"""
+#
+#     class FileType(models.TextChoices):
+#         PDF = 'PDF', _('Archivo PDF')
+#         IMAGE = 'IMG', _('Imagen')
+#         VIDEO = 'VIDEO', _('Video')
+#
+#     appointment = models.ForeignKey(
+#         Appointment, verbose_name=_('cita'), related_name='multimedia', on_delete=models.CASCADE
+#     )
+#     file = models.FileField(_('archivo'), upload_to='appointments/files', validators=[
+#         FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png', 'webp', 'pdf'])
+#     ])
+#     file_type = models.CharField(_('tipo de archivo'), max_length=8, choices=FileType.choices)
+#
+#     class Meta:
+#         db_table = 'appointment_multimedia'
+#         verbose_name = _('archivo de la cita')
+#         verbose_name_plural = _('archivos de las citas')
+#
+#     def _str_(self):
+#         return self.file.name
 
 class Comment(models.Model):
     comment_id = models.BigAutoField(primary_key=True)

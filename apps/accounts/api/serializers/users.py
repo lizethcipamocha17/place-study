@@ -86,6 +86,7 @@ class UserTeacherListRelatedSerializer(serializers.ModelSerializer):
 
 
 class UserListSerializer(serializers.ModelSerializer):
+    school = SchoolSerializer(read_only=True)
     teacher = UserTeacherListRelatedSerializer(read_only=True)
 
     class Meta:

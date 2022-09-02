@@ -41,7 +41,14 @@ class UserViewSet(viewsets.ModelViewSet):
         queryset = self.filter_queryset(self.get_queryset())
         page = self.paginate_queryset(queryset)
         serializer = UserListSerializer(page, many=True)
-        return self.get_paginated_response(serializer.data)
+        ser = self.get_paginated_response(serializer.data)
+        ser.data.update({
+            "teacher_count": User.objects.filter(type_user=User.Type.TEACHER).count(),
+            "student_count": User.objects.filter(type_user=User.Type.STUDENT).count()
+        })
+        ser.data.move_to_end("teacher_count", last=False)
+        ser.data.move_to_end("student_count", last=False)
+        return Response(ser.data, status=status.HTTP_200_OK)
 
     def update(self, request, *args, **kwargs):
         if request.user.type_user != User.Type.ADMIN:

@@ -165,6 +165,7 @@ STATIC_URL = "/static/"
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:9014",
+    "https://chatcomp.netlify.app",
 ]
 
 MEDIA_URL = '/media/'
