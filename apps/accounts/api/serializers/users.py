@@ -107,7 +107,7 @@ class UserStudentListSerializer(serializers.ModelSerializer):
             'first_name', 'last_name', 'email', 'teacher', 'birthday_date', 'photo', 'username', 'school',
             'type_user', 'terms'
         )
-        read_only_fields = ('first_name', 'last_name', 'email', 'birthday_date', 'photo')
+        read_only_fields = ('first_name', 'last_name', 'email', 'birthday_date')
 
 
 class UserInvitedSerializer(serializers.ModelSerializer):

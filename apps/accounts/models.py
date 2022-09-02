@@ -12,7 +12,7 @@ from .validators import validate_photo_weight
 from apps.schools.models import School
 
 
-def upload_to(filename):
+def upload_to(instance, filename):
     return 'photo/{filename}'.format(filename=filename)
 
 
