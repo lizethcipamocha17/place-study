@@ -21,11 +21,13 @@ class ContentSerializer(serializers.ModelSerializer):
     ContentSerializer is serializer of content
     """
     likes = serializers.SerializerMethodField(read_only=True)
+    comment = serializers.SerializerMethodField(read_only=True)
+    school = SchoolSerializer(read_only=True)
 
     class Meta:
         model = Content
-        # fields = '__all__'
-        exclude = ('school',)
+        fields = '__all__'
+
 
     def create(self, validated_data):
         return Content.objects.create(school=self.context['school'], **validated_data)
@@ -33,6 +35,9 @@ class ContentSerializer(serializers.ModelSerializer):
     def get_likes(self, obj):
         """This function returns all likes by content"""
         return Like.objects.filter(content=obj).count()
+
+    def get_comment(self, obj):
+        return Comment.objects.filter(content=obj).count()
 
 
 class UserListRelatedSerializer(serializers.ModelSerializer):
