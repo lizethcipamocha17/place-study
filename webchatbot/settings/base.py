@@ -164,7 +164,7 @@ STATIC_URL = "/static/"
 
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:9014",
+    "http://localhost:9016",
     "https://chatcomp.netlify.app",
 ]
 

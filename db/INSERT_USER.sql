@@ -12,7 +12,7 @@ VALUES (2, 'pbkdf2_sha256$216000$gPAp4ltaSME2$IKqD+7TzVpVyrViBAxDLSTF8c3wVY4ZGL2
         'lizeth.cipamochacar17@enslap.edu.co', '2006-03-20', 'lizeth', 'STDT', true, false, true, '2021-05-20 22:46:23',
         '2021-06-20 22:41:23', 8, 3),
        (5, 'pbkdf2_sha256$216000$gPAp4ltaSME2$IKqD+7TzVpVyrViBAxDLSTF8c3wVY4ZGL2pGQh08+mw=', false, 'Erika Marcela',
-        'Rincón Rico','erika@enslap.edu.co', '2005-05-20', 'erika', 'STDT', true, false, true, '2021-05-20 22:46:23',
+        'Rincón Rico', 'erika@enslap.edu.co', '2005-05-20', 'erika', 'STDT', true, false, true, '2021-05-20 22:46:23',
         '2021-06-20 22:41:23', 8, 3),
        (6, 'pbkdf2_sha256$216000$gPAp4ltaSME2$IKqD+7TzVpVyrViBAxDLSTF8c3wVY4ZGL2pGQh08+mw=', false, 'Laura', 'Castillo',
         'laura.castillo@gmail.com', '2004-05-12', 'laura25', 'STDT', true, false, true, '2021-05-20 22:46:23',
@@ -35,8 +35,14 @@ VALUES (2, 'pbkdf2_sha256$216000$gPAp4ltaSME2$IKqD+7TzVpVyrViBAxDLSTF8c3wVY4ZGL2
         'jairo.cardenas@ensst.edu.co', '2007-05-20', 'jairo6945', 'STDT', true, false, true, '2021-05-20 22:46:23',
         '2021-06-20 22:41:23', 3,
         9),
-       (11, 'pbkdf2_sha256$216000$gPAp4ltaSME2$IKqD+7TzVpVyrViBAxDLSTF8c3wVY4ZGL2pGQh08+mw=', false, 'Juan Pablo',
+        (11, 'pbkdf2_sha256$216000$gPAp4ltaSME2$IKqD+7TzVpVyrViBAxDLSTF8c3wVY4ZGL2pGQh08+mw=', false, 'Juan Pablo',
         'Bernal Cipamocha',
         'juanpablo@ensst.edu.co', '2004-05-20', 'juanpablo41', 'STDT', true, false, true, '2021-05-20 22:46:23',
         '2021-06-20 22:41:23', 3,
-        9);
+        9),
+        (12, 'pbkdf2_sha256$216000$gPAp4ltaSME2$IKqD+7TzVpVyrViBAxDLSTF8c3wVY4ZGL2pGQh08+mw=', false, ' Natalia',
+                 'Cardenas','lizeth.cipamochacar17@gmail.com', '1985-07-20', 'natalia56', 'TCHR', true, true, true, '2021-05-20 22:41:23','2021-06-20 22:41:23', 2, null),
+        (13, 'pbkdf2_sha256$216000$gPAp4ltaSME2$IKqD+7TzVpVyrViBAxDLSTF8c3wVY4ZGL2pGQh08+mw=', false, 'Marcela',
+       'Rico','ericka.rinconr@usantoto.edu.co', '1985-07-20', 'marce47', 'TCHR', true, true, true, '2021-05-20 22:41:23',
+     '2021-06-20 22:41:23', 2, null)
+
