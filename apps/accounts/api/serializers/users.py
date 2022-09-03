@@ -80,7 +80,7 @@ class UserTeacherListRelatedSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = (
-            'first_name', 'last_name', 'email', 'photo', 'username'
+            'user_id', 'first_name', 'last_name', 'email', 'photo', 'username'
         )
         read_only_fields = ('email',)
 
