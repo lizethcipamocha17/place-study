@@ -17,7 +17,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         exclude = (
-            'is_superuser', 'is_staff', 'last_login', 'created_at', 'updated_at', 'groups', 'user_permissions', 'terms'
+            'is_superuser', 'last_login', 'created_at', 'updated_at', 'groups', 'user_permissions'
         )
 
     def validate(self, data):
