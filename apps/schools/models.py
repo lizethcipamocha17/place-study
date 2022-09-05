@@ -6,6 +6,10 @@ def upload_to(instance, filename):
     return 'content/{filename}'.format(filename=filename)
 
 
+def upload_to_document(instance, filename):
+    return 'content/documents/{filename}'.format(filename=filename)
+
+
 def upload_to_school(instance, filename):
     return 'school/{filename}'.format(filename=filename)
 
@@ -49,29 +53,33 @@ class Content(models.Model):
     def __str__(self):
         return self.name
 
-# class AppointmentMultimedia(models.Model):
-#     """Appointment Multimedia model"""
-#
-#     class FileType(models.TextChoices):
-#         PDF = 'PDF', _('Archivo PDF')
-#         IMAGE = 'IMG', _('Imagen')
-#         VIDEO = 'VIDEO', _('Video')
-#
-#     appointment = models.ForeignKey(
-#         Appointment, verbose_name=_('cita'), related_name='multimedia', on_delete=models.CASCADE
-#     )
-#     file = models.FileField(_('archivo'), upload_to='appointments/files', validators=[
-#         FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png', 'webp', 'pdf'])
-#     ])
-#     file_type = models.CharField(_('tipo de archivo'), max_length=8, choices=FileType.choices)
-#
-#     class Meta:
-#         db_table = 'appointment_multimedia'
-#         verbose_name = _('archivo de la cita')
-#         verbose_name_plural = _('archivos de las citas')
-#
-#     def _str_(self):
-#         return self.file.name
+
+class DocumentContent(models.Model):
+    """Document Content model"""
+
+    class FileType(models.TextChoices):
+        PDF = 'PDF', 'Archivo PDF'
+        WORD = 'WORD', 'Archivo WORD'
+        PPTX = 'POWER_POINT', 'Archivo POWER POINT'
+        URL = 'URL', 'Enlace del archivo'
+
+    content = models.ForeignKey(
+        Content, verbose_name='contenido', related_name='documents', on_delete=models.CASCADE
+    )
+    file = models.FileField('archivo', upload_to=upload_to_document, null=True, blank=True, validators=[
+        FileExtensionValidator(allowed_extensions=['docx', 'pdf', 'pptx'])
+    ])
+    url = models.URLField('enlace del documento', null=True, blank=True)
+    file_type = models.CharField('tipo de archivo', max_length=11, choices=FileType.choices)
+
+    class Meta:
+        db_table = 'document_content'
+        verbose_name = 'documento extra por publicación'
+        verbose_name_plural = 'documentos extra por publicación'
+
+    def _str_(self):
+        return self.file.name
+
 
 class Comment(models.Model):
     comment_id = models.BigAutoField(primary_key=True)

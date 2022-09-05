@@ -3,7 +3,8 @@ from rest_framework import serializers
 
 # Models
 from apps.accounts.models import User
-from apps.schools.models import School, Content, Comment, Like
+from apps.schools.models import School, Content, Comment, Like, DocumentContent
+from apps.utils.schools import save_document_content
 
 
 class SchoolSerializer(serializers.ModelSerializer):
@@ -16,6 +17,19 @@ class SchoolSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class DocumentContentSerializer(serializers.ModelSerializer):
+    """Document Content Serializer"""
+
+    file_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = DocumentContent
+        exclude = ('content',)
+
+    def get_file_name(self, obj):
+        return obj.file.name.split('/')[-1]
+
+
 class ContentSerializer(serializers.ModelSerializer):
     """
     ContentSerializer is serializer of content
@@ -23,14 +37,20 @@ class ContentSerializer(serializers.ModelSerializer):
     likes = serializers.SerializerMethodField(read_only=True)
     comment = serializers.SerializerMethodField(read_only=True)
     school = SchoolSerializer(read_only=True)
+    documents = DocumentContentSerializer(many=True, required=False)
 
     class Meta:
         model = Content
-        fields = '__all__'
-
+        fields = (
+            'content_id', 'school', 'name', 'description', 'image', 'created_at', 'updated_at', 'likes', 'comment',
+            'school', 'documents'
+        )
 
     def create(self, validated_data):
-        return Content.objects.create(school=self.context['school'], **validated_data)
+        documents = validated_data.pop('documents', None)
+        content = Content.objects.create(school=self.context['school'], **validated_data)
+        save_document_content(documents, content)
+        return content
 
     def get_likes(self, obj):
         """This function returns all likes by content"""
@@ -38,6 +58,13 @@ class ContentSerializer(serializers.ModelSerializer):
 
     def get_comment(self, obj):
         return Comment.objects.filter(content=obj).count()
+
+
+class ContentListSerializer(serializers.ModelSerializer):
+    likes = serializers.SerializerMethodField(read_only=True)
+    comment = serializers.SerializerMethodField(read_only=True)
+    school = SchoolSerializer(read_only=True)
+    documents = DocumentContentSerializer(many=True, required=False)
 
 
 class UserListRelatedSerializer(serializers.ModelSerializer):
