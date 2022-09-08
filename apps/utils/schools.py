@@ -1,4 +1,4 @@
-from apps.schools.models import DocumentContent
+from apps.contents.models import DocumentContent
 
 
 def save_document_content(documents, content):

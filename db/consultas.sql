@@ -14,10 +14,11 @@ where s.school_id = 2 and u.type_user = 'TCHR';
 -- mostrar contenido según el colegio del usuario logueado y comentarios
 
 
-select u.first_name,u.last_name, cm.text, c.name,s.school_name , c.school_id from school s
-inner join content c on s.school_id = c.school_id
-inner join comment cm on c.content_id = cm.content_id
-inner join public."user" u on cm.user_id = u.user_id
+
+select u.first_name,u.last_name, c.name,s.school_name  from content c
+inner join public."user" u on c.author_id= u.user_id
+inner join school s on u.school_id = s.school_id
+
 where user_id = 4;
 
 -- like por contenidos de un colegio

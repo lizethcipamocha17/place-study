@@ -12,6 +12,7 @@ router = DefaultRouter()
 router.register(r'v1/accounts', accounts_api.AccountViewSet, basename='accounts')
 router.register(r'v1/users', users.UserViewSet, basename='users')
 
+
 urlpatterns = [
 
     path('', include(router.urls))

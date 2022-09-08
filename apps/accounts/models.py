@@ -8,8 +8,7 @@ from django.db import models
 from django.utils import timezone
 
 from .validators import validate_photo_weight
-
-from apps.schools.models import School
+from ..schools.models import School
 
 
 def upload_to(instance, filename):

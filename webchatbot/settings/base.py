@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     # apps local
     'apps.accounts',
     'apps.schools',
-    'apps.questions',
+    'apps.contents',
 
     # django rest framework
     'rest_framework',

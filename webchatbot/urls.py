@@ -25,6 +25,7 @@ urlpatterns = [
                   path('views/accounts/', include('apps.accounts.urls')),
 
                   path('api/', include('apps.accounts.api.urls'), name='accounts'),
-                  path('api/', include('apps.schools.api.urls'), name='schools')
+                  path('api/', include('apps.schools.api.urls'), name='schools'),
+                  path('api/', include('apps.contents.api.urls'), name='contents')
 
               ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
