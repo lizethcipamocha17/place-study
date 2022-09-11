@@ -42,7 +42,7 @@ class ContentViewSet(viewsets.ModelViewSet):
         """
         Service for list all Contents for user loged and school
         """
-        content_serializer = ContentSerializer(self.get_queryset(pk), many=True)
+        content_serializer = ContentSerializer(self.get_queryset(pk), many=True, context={'request': request})
         return Response(content_serializer.data)
 
     def retrieve(self, request, pk=None, pk3=None, *args, **kwargs):

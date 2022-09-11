@@ -13,6 +13,7 @@ class DocumentContentSerializer(serializers.ModelSerializer):
     """Document Content Serializer"""
 
     file_name = serializers.SerializerMethodField()
+    # file_url = serializers.SerializerMethodField()
 
     class Meta:
         model = DocumentContent
@@ -20,6 +21,10 @@ class DocumentContentSerializer(serializers.ModelSerializer):
 
     def get_file_name(self, obj):
         return obj.file.name.split('/')[-1]
+
+    # def get_file_url(self, obj):
+    #     request = self.context.get('request')
+    #     return request.build_absolute_uri(obj.file.url)
 
 
 class ContentSerializer(serializers.ModelSerializer):
