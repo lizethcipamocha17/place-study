@@ -9,14 +9,14 @@ from apps.accounts.models import User
 
 # Utils
 from apps.contents.api.serializers.content_serializer import ContentSerializer, LikeCreateSerializer, \
-    CommentListSerializer, CommentCreateSerializer
+    CommentListSerializer, CommentCreateSerializer, ContentListSerializer
 from apps.contents.models import Content, Like, Comment
 from apps.utils.utils import parse_int
 
 
 class ContentViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
-    serializer_class = ContentSerializer
+    serializer_class = ContentListSerializer
     lookup_url_kwarg = 'pk3'
 
     def get_queryset(self, pk=None, pk3=None):
@@ -42,12 +42,12 @@ class ContentViewSet(viewsets.ModelViewSet):
         """
         Service for list all Contents for user loged and school
         """
-        content_serializer = ContentSerializer(self.get_queryset(pk), many=True, context={'request': request})
+        content_serializer = self.get_serializer(self.get_queryset(pk), many=True, context={'request': request})
         return Response(content_serializer.data)
 
     def retrieve(self, request, pk=None, pk3=None, *args, **kwargs):
         """This function return a content"""
-        content_serializer = ContentSerializer(self.get_queryset(pk, pk3))
+        content_serializer = self.get_serializer(self.get_queryset(pk, pk3))
         return Response(content_serializer.data)
 
     @action(detail=True, methods=['post', 'delete'])
@@ -62,7 +62,7 @@ class ContentViewSet(viewsets.ModelViewSet):
             like = serializer.save()
             likes = Like.objects.filter(content=content).count()
             data = {
-                'content': ContentSerializer(content).data,
+                'content': self.get_serializer(content).data,
                 'like': like.like,
                 'likes': likes
             }
@@ -76,7 +76,7 @@ class ContentViewSet(viewsets.ModelViewSet):
             like.delete()
             likes = Like.objects.filter(content=content).count()
             data = {
-                'content': ContentSerializer(content).data,
+                'content':self.get_serializer(content).data,
                 'like': False,
                 'likes': likes
             }
@@ -91,13 +91,13 @@ class UserContentsViewSet(viewsets.ModelViewSet):
     serializer_class = ContentSerializer
 
     def get_queryset(self):
-        return Content.objects.filter(school__user=self.request.user)
+        return Content.objects.filter(author=self.request.user)
 
     def create(self, request, *args, **kwargs):
         if request.user.type_user != User.Type.TEACHER:
             raise PermissionDenied(detail="No tienes permiso para realizar esta acción")
 
-        serializer = self.get_serializer(data=request.data, context={'author': request.user})
+        serializer = self.get_serializer(data=request.data, context={'request': request}, )
         # context={'user': request.user}
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -118,6 +118,7 @@ class UserContentsViewSet(viewsets.ModelViewSet):
 
         content = self.get_object()
         partial = request.method == 'PATCH'
+        print(request.data,'REQUEST UPDATE VIEW')
         serializer = self.get_serializer(content, data=request.data, partial=partial, context={'request': request})
         if serializer.is_valid():
             serializer.save()

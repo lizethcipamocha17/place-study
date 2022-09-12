@@ -6,7 +6,7 @@ from apps.accounts.api.serializers.users import UserTeacherSerializer
 from apps.accounts.models import User
 from apps.contents.models import DocumentContent, Content, Like, Comment
 
-from apps.utils.schools import save_document_content
+from apps.utils.contents import save_document_content, update_document_content
 
 
 class DocumentContentSerializer(serializers.ModelSerializer):
@@ -16,7 +16,8 @@ class DocumentContentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = DocumentContent
-        exclude = ('content',)
+        fields = ('id', 'file', 'url', 'file_type', 'file_name')
+
 
     def get_file_name(self, obj):
         return obj.file.name.split('/')[-1]
@@ -26,23 +27,45 @@ class ContentSerializer(serializers.ModelSerializer):
     """
     ContentSerializer is serializer of content
     """
-    likes = serializers.SerializerMethodField(read_only=True)
-    comment = serializers.SerializerMethodField(read_only=True)
     author = UserTeacherSerializer(read_only=True)
     documents = DocumentContentSerializer(many=True, required=False)
 
     class Meta:
         model = Content
         fields = (
-            'content_id', 'name', 'description', 'image', 'created_at', 'updated_at', 'likes', 'comment',
+            'content_id', 'name', 'description', 'image', 'created_at', 'updated_at',
             'documents', 'author'
         )
 
     def create(self, validated_data):
         documents = validated_data.pop('documents', None)
-        content = Content.objects.create(author=self.context['author'], **validated_data)
+        content = Content.objects.create(author=self.context['request'].user, **validated_data)
         save_document_content(documents, content)
         return content
+
+    def update(self, instance, validated_data):
+        documents = validated_data.pop('documents', None)
+        print(documents, 'documents update')
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+
+        instance.save()
+        return update_document_content(documents, instance)
+
+
+class ContentListSerializer(serializers.ModelSerializer):
+    likes = serializers.SerializerMethodField(read_only=True)
+    comment = serializers.SerializerMethodField(read_only=True)
+    author = UserTeacherSerializer(read_only=True)
+    documents = DocumentContentSerializer(many=True, read_only=True)
+    documents_count = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = Content
+        fields = (
+            'content_id', 'name', 'description', 'image', 'created_at', 'updated_at', 'likes', 'comment',
+            'documents', 'author', 'documents_count'
+        )
 
     def get_likes(self, obj):
         """This function returns all likes by content"""
@@ -50,6 +73,9 @@ class ContentSerializer(serializers.ModelSerializer):
 
     def get_comment(self, obj):
         return Comment.objects.filter(content=obj).count()
+
+    def get_documents_count(self, obj):
+        return DocumentContent.objects.filter(content=obj).count()
 
 
 class UserListRelatedSerializer(serializers.ModelSerializer):
