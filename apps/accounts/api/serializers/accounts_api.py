@@ -116,11 +116,14 @@ class UserSignUpSerializer(serializers.ModelSerializer):
             },
         )
         site = get_site_domain(self.context['request'])
+        print(site, 'DOMINIO')
+
         context = {
             'teacher_first_name': user.teacher.first_name if user.type_user == User.Type.STUDENT else None,
             'user_full_name': user.full_name,
             'user_type': user.type_user if user.type_user == User.Type.STUDENT else User.Type.ADMIN,
             'site': f'{site}/home/accountactivation/{token_jwt}'
+
         }
 
         subject = 'Verificación de cuenta de usuario'

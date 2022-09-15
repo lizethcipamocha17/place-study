@@ -106,7 +106,7 @@ class UserStudentListSerializer(serializers.ModelSerializer):
         model = User
         fields = (
             'first_name', 'last_name', 'email', 'teacher', 'birthday_date', 'photo', 'username', 'school',
-            'type_user', 'terms'
+            'type_user'
         )
         read_only_fields = ('first_name', 'last_name', 'email', 'birthday_date')
 
