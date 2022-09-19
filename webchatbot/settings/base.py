@@ -166,8 +166,8 @@ STATIC_URL = "/static/"
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:9016",
     "https://chatcomp.netlify.app",
-    "place-study.web.app",
-    "place-study.firebaseapp.com"
+    "https://place-study.web.app",
+    "https://place-study.firebaseapp.com",
 ]
 
 MEDIA_URL = '/media/'
