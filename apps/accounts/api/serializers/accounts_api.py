@@ -99,7 +99,7 @@ class UserSignUpSerializer(serializers.ModelSerializer):
         token = Token.objects.create(user=user)
 
         """Send account validation email"""
-        self.send_email_account_activation(user)
+        #self.send_email_account_activation(user)
         return user, token.key
 
     def send_email_account_activation(self, user):
