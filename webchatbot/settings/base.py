@@ -61,7 +61,7 @@ X_FRAME_OPTIONS = 'SAMEORIGIN'  # only if django version >= 3.0
 AUTH_USER_MODEL = 'accounts.User'
 
 # Django-allauth
-SITE_ID = 1
+SITE_ID = 4
 # email requerido
 ACCOUNT_EMAIL_REQUIRED = True
 # se pueda deslogear
