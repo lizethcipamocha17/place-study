@@ -49,7 +49,7 @@ class UserLoginSerializer(serializers.Serializer):
             raise serializers.ValidationError('Email o contraseña incorrectos')
 
         if not user.is_active:
-            raise serializers.ValidationError('Su cuenta esta inactiva')
+            raise serializers.ValidationError({'message': 'inactive'})
         else:
             """save the user in the context for later in create to retrieve the token"""
             self.context['user'] = user
