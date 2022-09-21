@@ -166,7 +166,7 @@ class ResetPasswordSerializer(serializers.Serializer):
         url_site = get_site_domain(self.context['request'])
         context = {
             'first_name': user.first_name,
-            'site': f'{url_site}/accounts/recovery/password/{token_jwt}'
+            'site': f'{url_site}/accounts/recoverypassword/{token_jwt}'
         }
 
         subject = 'Recuperar contraseña'
@@ -196,9 +196,11 @@ class AccountActivationSerializer(serializers.Serializer):
 
     def send_email_account_activation(self, user):
         """This function send email notify user that their account has been activated"""
+        url_site = get_site_domain(self.context['request'])
         context = {
             'first_name': user.first_name,
-            'teacher_name': user.teacher.full_name if user.type_user == User.Type.STUDENT else None
+            'teacher_name': user.teacher.full_name if user.type_user == User.Type.STUDENT else None,
+            'site': f'{url_site}/home/login'
         }
         subject = 'Validación de ingreso'
         template = 'accounts/emails/notification_user.html'
