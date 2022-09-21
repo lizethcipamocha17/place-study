@@ -123,6 +123,14 @@ class UserInvitedSerializer(serializers.ModelSerializer):
         )
 
 
+class UserListSerializerLike(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = (
+            'user_id', 'first_name', 'last_name', 'username', 'type_user'
+        )
+
+
 class ChangePasswordSerializer(serializers.Serializer):
     """
     ChangePasswordSerializer is the Serializer for password change endpoint.

@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework import status, viewsets
 # Models
+from apps.accounts.api.serializers.users import UserListSerializerLike
 from apps.accounts.models import User
 
 # Utils
@@ -26,9 +27,7 @@ class ContentViewSet(viewsets.ModelViewSet):
         if school != parse_int(pk):
             raise PermissionDenied(detail='No tienes permiso para realizar esta acción.')
 
-        queryset = Content.objects.filter(author__school_id=school)
-        # queryset = Content.objects.filter(user__school_id= school)
-        print("SQL=", queryset.query)
+        queryset = Content.objects.filter(author__school_id=school).order_by('-created_at')
         if pk3 is not None:
             pk3 = parse_int(pk3)
             queryset = queryset.filter(pk=pk3).first()
@@ -61,8 +60,10 @@ class ContentViewSet(viewsets.ModelViewSet):
             serializer.is_valid(raise_exception=True)
             like = serializer.save()
             likes = Like.objects.filter(content=content).count()
+            user_like = User.objects.filter(like__content=content)
             data = {
                 'content': self.get_serializer(content).data,
+                'user': UserListSerializerLike(user_like, many=True).data,
                 'like': like.like,
                 'likes': likes
             }
@@ -76,7 +77,7 @@ class ContentViewSet(viewsets.ModelViewSet):
             like.delete()
             likes = Like.objects.filter(content=content).count()
             data = {
-                'content':self.get_serializer(content).data,
+                'content': self.get_serializer(content).data,
                 'like': False,
                 'likes': likes
             }
@@ -118,7 +119,7 @@ class UserContentsViewSet(viewsets.ModelViewSet):
 
         content = self.get_object()
         partial = request.method == 'PATCH'
-        print(request.data,'REQUEST UPDATE VIEW')
+        print(request.data, 'REQUEST UPDATE VIEW')
         serializer = self.get_serializer(content, data=request.data, partial=partial, context={'request': request})
         if serializer.is_valid():
             serializer.save()

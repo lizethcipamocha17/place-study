@@ -9,8 +9,8 @@ from rest_framework.exceptions import ParseError
 
 def get_site_domain(request):
     """This function returns the domain"""
-    current_site = get_current_site(request).domain
-    return f'{current_site}'
+    return get_current_site(request).domain
+
 
 
 def send_email(subject, from_email, to, template, context):
