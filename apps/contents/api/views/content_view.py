@@ -169,6 +169,7 @@ class CommentViewSet(viewsets.ModelViewSet):
 class LikeUserViewSet(viewsets.ModelViewSet):
 
     def list(self, request, *args, **kwargs):
-        queryset = Like.objects.all()
+        user = request.user
+        queryset = Like.objects.filter(user_id=user)
         like_serializer = LikeListUser(queryset, many=True).data
         return Response(like_serializer)
