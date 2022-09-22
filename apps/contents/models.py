@@ -18,7 +18,7 @@ class Content(models.Model):
     content_id = models.BigAutoField(primary_key=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Nombre del autor del contenido')
     name = models.CharField('Nombre de la Publicación', max_length=60)
-    description = models.CharField('Descripción de la publicación', max_length=350)
+    description = models.CharField('Descripción de la publicación', max_length=100)
     image = models.ImageField(
         'Imagen de la publicación', upload_to=upload_to,
         validators=[FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png'])]
