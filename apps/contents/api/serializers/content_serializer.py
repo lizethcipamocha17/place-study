@@ -18,7 +18,6 @@ class DocumentContentSerializer(serializers.ModelSerializer):
         model = DocumentContent
         fields = ('id', 'file', 'url', 'file_type', 'file_name')
 
-
     def get_file_name(self, obj):
         return obj.file.name.split('/')[-1]
 
@@ -135,3 +134,9 @@ class LikeCreateSerializer(serializers.Serializer):
 
         like, created = Like.objects.get_or_create(content=content, user=user, like=True)
         return like
+
+
+class LikeListUser(serializers.ModelSerializer):
+    class Meta:
+        model = Like
+        fields = ('like_id', 'like', 'content_id', 'user_id')

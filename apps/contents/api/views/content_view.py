@@ -10,7 +10,7 @@ from apps.accounts.models import User
 
 # Utils
 from apps.contents.api.serializers.content_serializer import ContentSerializer, LikeCreateSerializer, \
-    CommentListSerializer, CommentCreateSerializer, ContentListSerializer
+    CommentListSerializer, CommentCreateSerializer, ContentListSerializer, LikeListUser
 from apps.contents.models import Content, Like, Comment
 from apps.utils.utils import parse_int
 
@@ -164,3 +164,11 @@ class CommentViewSet(viewsets.ModelViewSet):
         queryset = Comment.objects.filter(content=content)
         comment_serializer = CommentListSerializer(queryset, many=True).data
         return Response(comment_serializer)
+
+
+class LikeUserViewSet(viewsets.ModelViewSet):
+
+    def list(self, request, *args, **kwargs):
+        queryset = Like.objects.all()
+        like_serializer = LikeListUser(queryset, many=True).data
+        return Response(like_serializer)

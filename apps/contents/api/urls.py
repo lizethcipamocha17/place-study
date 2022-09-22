@@ -9,6 +9,7 @@ router.register(r'v1/schools/(?P<pk>[^/.]+)/contents', content_view.ContentViewS
 router.register(r'v1/schools/(?P<pk>[^/.]+)/contents/(?P<pk3>[^/.]+)/comments', content_view.CommentViewSet,
                 basename='comments')
 router.register(r'v1/contents', content_view.UserContentsViewSet, basename='user-contents')
+router.register(r'v1/likes', content_view.LikeUserViewSet, basename='user-likes')
 
 urlpatterns = [
     path('', include(router.urls))
