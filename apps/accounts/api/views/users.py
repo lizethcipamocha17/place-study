@@ -122,3 +122,4 @@ class UserViewSet(viewsets.ModelViewSet):
             serializer.save()
             return Response({'message': 'Contraseña actualizada correctamente'}, status=status.HTTP_201_CREATED)
         return Response({'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+

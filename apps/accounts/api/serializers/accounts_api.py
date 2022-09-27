@@ -166,7 +166,7 @@ class ResetPasswordSerializer(serializers.Serializer):
         url_site = get_site_domain(self.context['request'])
         context = {
             'first_name': user.first_name,
-            'site': f'{url_site}/accounts/recoverypassword/{token_jwt}'
+            'site': f'{url_site}/home/recoverypassword/{token_jwt}'
         }
 
         subject = 'Recuperar contraseña'
