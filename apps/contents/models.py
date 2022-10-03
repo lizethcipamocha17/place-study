@@ -1,3 +1,5 @@
+import os.path
+
 from django.db import models
 from django.core.validators import FileExtensionValidator
 
@@ -60,6 +62,10 @@ class DocumentContent(models.Model):
 
     def _str_(self):
         return self.file.name
+
+    @property
+    def file_name(self):
+        return os.path.basename(self.file.name)
 
 
 class Comment(models.Model):

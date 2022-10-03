@@ -16,11 +16,11 @@ def update_document_content(documents, content):
     """Save the files of the content in the database"""
     print(documents, 'documents ')
     if documents:
-        objs = []
         for document in documents:
-            dc = DocumentContent.objects.get(file_name=document['file_name'], content=content)
+            dc = DocumentContent.objects.get(file=document['file_name'], content=content)
             dc.file = document['file']
             dc.file_type = document['file_type']
-            objs.append(dc)
-        DocumentContent.objects.bulk_update(objs, ['file', 'file_type'])
+            if 'url' in document:
+                dc.url = document['url']
+            dc.save()
     return content

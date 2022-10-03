@@ -9,17 +9,15 @@ from apps.contents.models import DocumentContent, Content, Like, Comment
 from apps.utils.contents import save_document_content, update_document_content
 
 
-class DocumentContentSerializer(serializers.ModelSerializer):
+class DocumentContentSerializer(serializers.Serializer):
     """Document Content Serializer"""
-
-    file_name = serializers.SerializerMethodField()
+    file = serializers.FileField()
+    url = serializers.URLField(required=False)
+    file_type = serializers.ChoiceField(choices=DocumentContent.FileType.choices)
+    file_name = serializers.CharField(required=False)
 
     class Meta:
-        model = DocumentContent
-        fields = ('id', 'file', 'url', 'file_type', 'file_name')
-
-    def get_file_name(self, obj):
-        return obj.file.name.split('/')[-1]
+        fields = ('file', 'url', 'file_type', 'file_name')
 
 
 class ContentSerializer(serializers.ModelSerializer):
